@@ -41,27 +41,13 @@ namespace
   {
     // seed the random number generator with the current time
     srand( time( NULL ) );
-    //system = new SimpleSystem();
+    system = new SimpleSystem();
     //system = new PendulumSystem(3);
-    system = new ClothSystem();
+    // system = new ClothSystem();
     
-    switch(*argv[1])
-    {
-        case 'e':
-            cout << "Running with Integrator: EULER" << endl;
-            timeStepper = new ForwardEuler();
-            break;
-        case 't':
-            cout << "Running with Integrator: Trapzoidal" << endl;
-            timeStepper = new Trapzoidal();
-            break;
-        default:
-            cout << "Running with Integrator: RK4" << endl;
-            timeStepper = new RK4();
-    }
+    cout << "Running with Integrator: RK4" << endl;
+    timeStepper = new RK4();
 
-    stringstream ss(argv[2]);
-    ss >> STEP_SIZE;
     cout << "Step size is: " << STEP_SIZE << "\n" << endl;
     cout << "*****************************************************************************************************" << endl;
     cout << "* To move the cloth and pendulum systems, press and hold the arrow keys                             *" << endl;
@@ -71,10 +57,6 @@ namespace
     cout << "* To create or restart the PendulumSystem, press 2                                                  *" << endl;
     cout << "* To create or restart the ClothSystem, press 3                                                     *" << endl;
     cout << "* To toggle wind, press w                                                                           *" << endl;
-    cout << "* To use ForwardEuler, press e                                                                      *" << endl;
-    cout << "* To use Trapzoidal, press t                                                                        *" << endl;
-    cout << "* To use Runge Kutta, press r                                                                       *" << endl;
-    cout << "* To change the step size, press i and then enter the float value into the terminal and press enter *" << endl;
     cout << "* To exit press Escape                                                                              *" << endl;
     cout << "*****************************************************************************************************" << endl;
   }
@@ -85,8 +67,6 @@ namespace
   ///and switch between different timeSteppers
   void stepSystem()
   {
-      ///TODO The stepsize should change according to commandline arguments
-    //const float h = 0.04f;
     if(timeStepper!=0){
       timeStepper->takeStep(system,STEP_SIZE);
     }
@@ -95,7 +75,6 @@ namespace
   // Draw the current particle positions
   void drawSystem()
   {
-    
     // Base material colors (they don't change)
     GLfloat particleColor[] = {0.4f, 0.7f, 1.0f, 1.0f};
     GLfloat floorColor[] = {1.0f, 0.0f, 0.0f, 1.0f};
@@ -105,7 +84,6 @@ namespace
     glutSolidSphere(0.1f,10.0f,10.0f);
     
     system->draw();
-    
     
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
     glPushMatrix();
@@ -166,20 +144,12 @@ namespace
             system->toggleSprings();
             break;
         case 'e':
-            cout << "Integrator set to ForwardEuler" << endl;
-            timeStepper = new ForwardEuler();
-            break;
+           break;
         case 'r':
-            cout << "Integrator set to RK4" << endl;
-            timeStepper = new RK4();
             break;
         case 't':
-            cout << "Integrator set to Trapzoidal" << endl;
-            timeStepper = new Trapzoidal();
             break;
         case 'i':
-            cout << "Please input a step size as a float value: " << endl;
-            cin >> STEP_SIZE;
             break;
         case 'p':
             cout << "Toggling particles rendering" << endl;
@@ -383,12 +353,12 @@ int main( int argc, char* argv[] )
     // Initial parameters for window position and size
     glutInitWindowPosition( 60, 60 );
     glutInitWindowSize( 600, 600 );
-    
+
     camera.SetDimensions( 600, 600 );
 
     camera.SetDistance( 10 );
     camera.SetCenter( Vector3f::ZERO );
-    
+
     glutCreateWindow("Assignment 3");
 
     // Initialize OpenGL parameters.
@@ -413,8 +383,7 @@ int main( int argc, char* argv[] )
 
     // Trigger timerFunc every 20 msec
     glutTimerFunc(20, timerFunc, 20);
-
-        
+       
     // Start the main loop.  glutMainLoop never returns.
     glutMainLoop();
 
