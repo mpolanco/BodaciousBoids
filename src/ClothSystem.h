@@ -5,6 +5,13 @@
 #include <vector>
 #include <math.h>
 
+#include <cmath>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <cstdlib>
+#include <vecmath.h>
+
 #include "particleSystem.h"
 
 class ClothSystem: public ParticleSystem
@@ -34,6 +41,22 @@ private:
 	void initMasses();
 	int indexOf(int row, int col);
 	void setSpring(int start, int end, float springConst, float restLength);
+
+
+	//Testing dove drawing
+	void loadDove();
+    void drawDove();
+
+    // Globals
+    int MAX_BUFFER_SIZE = 100;
+    // This is the list of points (3D vectors)
+    vector<Vector3f> vecv;
+
+    // This is the list of normals (also 3D vectors)
+    vector<Vector3f> vecn;
+
+    // This is the list of faces (indices into vecv and vecn)
+    vector<vector<unsigned> > vecf;
 
 };
 
