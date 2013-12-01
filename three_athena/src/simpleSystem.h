@@ -3,6 +3,8 @@
 
 #include "extra.h"
 #include <vector>
+#include <cmath>
+#include <iostream>
 
 #include "particleSystem.h"
 
@@ -22,6 +24,7 @@ public:
 
 protected:
     float minSeparation;
+    float minSquaredSeparation;
 };
 
 #endif
