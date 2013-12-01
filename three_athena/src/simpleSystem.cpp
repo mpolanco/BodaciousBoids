@@ -8,17 +8,16 @@ SimpleSystem::SimpleSystem()
 {
 	m_numParticles = 10;
 	for (int i=0; i < m_numParticles; i++) {
-		Vector3f pos = Vector3f(i*0.4, randf(), 0);
-		Vector3f vel = Vector3f(0, 0, 0);
+		Vector3f pos = Vector3f(i*0.4, randf(), randf());
+		Vector3f vel = Vector3f(0, randf(), 0);
 
 		m_vVecState.push_back(pos);
 		m_vVecState.push_back(vel);
 	}
 
 	minSeparation = 0.5f;
-	minSquaredSeparation = pow(minSeparation, 2);
+	neighborCutoff = 2.0f;
 	cout << "Init: articles should have minimum Separation: " << minSeparation << endl;
-	cout << "Init: And minSquaredSeparation: " << minSquaredSeparation << endl;
 
 }
 
@@ -44,6 +43,7 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 		float numTooClose = 0;
 		// Alignment
 		Vector3f alignForce = Vector3f::ZERO;
+		float numNearby = 0;
 		// Cohesion 
 		Vector3f cohesiveForce = Vector3f::ZERO;
 
@@ -64,6 +64,10 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 			}
 
 			// Alignment
+			if ( dist < neighborCutoff ) {
+				alignForce+= vel_j;
+				numNearby++;
+			}
 
 		}
 
@@ -71,9 +75,14 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 			sepForce*= (1/numTooClose); // average the separation forces
 		}
 
+		if (numNearby > 0) { // avoid dividing by zero
+			alignForce*= (1/numNearby); //average the align force
+			alignForce-= vel_i; // Implement Reynolds: Change = Desired - Current
+		}
+
 		// Cohesion
 		Vector3f perceived_center = perceivedCenter(flockCenter, pos_i);
-		cohesiveForce = (perceived_center - pos_i) / 5;
+		cohesiveForce = (perceived_center - pos_i) / 5; // weight the force so it's not overpowering
 		
 		forces+=sepForce;
 		forces+=alignForce;
@@ -113,8 +122,10 @@ void SimpleSystem::draw()
 	glutSolidSphere(0.075f,10.0f,10.0f);
 	glPopMatrix();
 
-	for (int i=0; i < m_numParticles; i++) {
-		Vector3f pos = m_vVecState[2*i]; // PARTICLE POSITION
+	for (int i=0; i < m_numParticles; i+=2) {
+		Vector3f pos = m_vVecState[i]; // PARTICLE POSITION
+		Vector3f vel = m_vVecState[i+1]; // PARTICLE VELOCITY
+		Vector3f top = -vel.normalized();
 
 		glPushMatrix();
 		glTranslatef(pos[0], pos[1], pos[2] );
@@ -122,7 +133,11 @@ void SimpleSystem::draw()
 		glColor3f(.2, .2, .1*i);
 		glDisable(GL_COLOR_MATERIAL);
 		glutSolidSphere(0.075f,10.0f,10.0f);
-		
+		glBegin(GL_TRIANGLES);
+		glVertex(top);
+		glVertex3f(-0.5f, -0.5f, -0.5f);
+		glVertex3f(0.5f, 0.5f, 0.5f);
+		glEnd();
 		glPopMatrix();
 	}
 }

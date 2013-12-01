@@ -26,6 +26,7 @@ public:
 protected:
     float minSeparation;
     float minSquaredSeparation;
+    float neighborCutoff;
 
     Vector3f perceivedCenter(Vector3f centerOfMass, Vector3f position);
 
