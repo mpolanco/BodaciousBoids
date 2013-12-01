@@ -8,8 +8,8 @@ SimpleSystem::SimpleSystem()
 {
 	m_numParticles = 10;
 	for (int i=0; i < m_numParticles; i++) {
-		Vector3f pos = Vector3f(i*0.45, 0, 0);
-		Vector3f vel = Vector3f(0, 0.2, 0);
+		Vector3f pos = Vector3f(i*0.4, i*randf(), 0);
+		Vector3f vel = Vector3f(0, 0, 0);
 
 		m_vVecState.push_back(pos);
 		m_vVecState.push_back(vel);
@@ -28,7 +28,7 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 {
 	vector<Vector3f> f;
 	Vector3f flockCenter = centerOfMass(state);
-	cout << "Flock center: " << flockCenter.x() << ", " << flockCenter.y() << ", " << flockCenter.z() << endl;
+	// cout << "Flock center: " << flockCenter.x() << ", " << flockCenter.y() << ", " << flockCenter.z() << endl;
 
 	// for each particle in the state
 	// evaluate actual forces, except anchor the first particle
@@ -57,9 +57,9 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 
 			// Separation
 			Vector3f diff = pos_i - pos_j;
-			float dist = diff.absSquared();
-			if ( dist < minSquaredSeparation ) {
-				sepForce-= (diff) ;
+			float dist = diff.abs();
+			if ( dist < minSeparation ) {
+				sepForce+= (diff) ;
 				numTooClose++;
 			}
 
@@ -73,14 +73,14 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 
 		// Cohesion
 		Vector3f perceived_center = perceivedCenter(flockCenter, pos_i);
-		cohesiveForce = (perceived_center - pos_i);
+		cohesiveForce = (perceived_center - pos_i)/ 20;
 		
 		forces+=sepForce;
 		forces+=alignForce;
 		forces+=cohesiveForce;		
 
-		f.push_back(vel_i);
-		f.push_back(forces);
+		f.push_back(vel_i+forces);
+		f.push_back(Vector3f::ZERO);
 	}
 
 	return f;
@@ -93,7 +93,6 @@ Vector3f SimpleSystem::centerOfMass(vector<Vector3f> state)
 	for(int i=0; i < state.size(); i+=2) {
 		summedPos+= state[i];
 	}
-	summedPos.print();
 	return summedPos/numPos;
 }
 
@@ -108,6 +107,12 @@ Vector3f SimpleSystem::perceivedCenter(Vector3f centerOfMass, Vector3f position)
 // render the system (ie draw the particles)
 void SimpleSystem::draw()
 {
+	Vector3f flockCenter = centerOfMass(m_vVecState);
+	glPushMatrix();
+	glTranslatef(flockCenter[0], flockCenter[1], flockCenter[2]);
+	glutSolidSphere(0.075f,10.0f,10.0f);
+	glPopMatrix();
+
 	for (int i=0; i < m_numParticles; i++) {
 		Vector3f pos = m_vVecState[2*i]; // PARTICLE POSITION
 

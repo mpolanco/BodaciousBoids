@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <cstdlib>
 
 #include "particleSystem.h"
 
@@ -21,10 +22,16 @@ public:
 	void draw();
 
     Vector3f centerOfMass(vector<Vector3f> positions);
-    Vector3f perceivedCenter(Vector3f centerOfMass, Vector3f position);
+
 protected:
     float minSeparation;
     float minSquaredSeparation;
+
+    Vector3f perceivedCenter(Vector3f centerOfMass, Vector3f position);
+
+    float randf() {
+        return ((float) rand()) /  (float) RAND_MAX ;
+    }
 };
 
 #endif
