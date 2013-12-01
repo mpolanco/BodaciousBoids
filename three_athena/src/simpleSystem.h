@@ -5,6 +5,8 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include <cstdlib>
 
 #include "particleSystem.h"
@@ -25,7 +27,6 @@ public:
 
 protected:
     float minSeparation;
-    float minSquaredSeparation;
     float neighborCutoff;
 
     Vector3f perceivedCenter(Vector3f centerOfMass, Vector3f position);
@@ -33,6 +34,21 @@ protected:
     float randf() {
         return ((float) rand()) /  (float) RAND_MAX ;
     }
+
+    //Testing dove drawing
+    void loadDove();
+    void drawDove();
+
+    // Globals
+    int MAX_BUFFER_SIZE;
+    // This is the list of points (3D vectors)
+    vector<Vector3f> vecv;
+
+    // This is the list of normals (also 3D vectors)
+    vector<Vector3f> vecn;
+
+    // This is the list of faces (indices into vecv and vecn)
+    vector<vector<unsigned> > vecf;
 };
 
 #endif

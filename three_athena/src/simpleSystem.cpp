@@ -6,6 +6,7 @@ using namespace std;
 // Repurposed for Flock
 SimpleSystem::SimpleSystem()
 {
+
 	m_numParticles = 10;
 	for (int i=0; i < m_numParticles; i++) {
 		Vector3f pos = Vector3f(i*0.4, randf(), randf());
@@ -18,7 +19,8 @@ SimpleSystem::SimpleSystem()
 	minSeparation = 0.5f;
 	neighborCutoff = 2.0f;
 	cout << "Init: articles should have minimum Separation: " << minSeparation << endl;
-
+	MAX_BUFFER_SIZE = 100;
+	loadDove();
 }
 
 // TODO: implement evalF
@@ -129,15 +131,75 @@ void SimpleSystem::draw()
 
 		glPushMatrix();
 		glTranslatef(pos[0], pos[1], pos[2] );
-		glEnable(GL_COLOR_MATERIAL);
-		glColor3f(.2, .2, .1*i);
-		glDisable(GL_COLOR_MATERIAL);
-		glutSolidSphere(0.075f,10.0f,10.0f);
-		glBegin(GL_TRIANGLES);
-		glVertex(top);
-		glVertex3f(-0.5f, -0.5f, -0.5f);
-		glVertex3f(0.5f, 0.5f, 0.5f);
-		glEnd();
+		// glEnable(GL_COLOR_MATERIAL);
+		// glColor3f(.2, .2, .1*i);
+		// glDisable(GL_COLOR_MATERIAL);
+		drawDove();
+
+		// glutSolidSphere(0.075f,10.0f,10.0f);
+		// glBegin(GL_TRIANGLES);
+		// glVertex(top);
+		// glVertex3f(-0.5f, -0.5f, -0.5f);
+		// glVertex3f(0.5f, 0.5f, 0.5f);
+		// glEnd();
+
 		glPopMatrix();
 	}
+}
+
+inline void SimpleSystem::drawDove()
+{
+    for( unsigned int i=0; i < vecf.size(); i++ )
+    {
+        glBegin(GL_TRIANGLES);
+        glNormal3d(vecn[vecf[i][2]-1][0], vecn[vecf[i][2]-1][1], vecn[vecf[i][2]-1][2]);
+        glVertex3d(vecv[vecf[i][0]-1][0], vecv[vecf[i][0]-1][1], vecv[vecf[i][0]-1][2]);
+        glNormal3d(vecn[vecf[i][5]-1][0], vecn[vecf[i][5]-1][1], vecn[vecf[i][5]-1][2]);
+        glVertex3d(vecv[vecf[i][3]-1][0], vecv[vecf[i][3]-1][1], vecv[vecf[i][3]-1][2]);
+        glNormal3d(vecn[vecf[i][8]-1][0], vecn[vecf[i][8]-1][1], vecn[vecf[i][8]-1][2]);
+        glVertex3d(vecv[vecf[i][6]-1][0], vecv[vecf[i][6]-1][1], vecv[vecf[i][6]-1][2]);
+        glEnd();
+    }
+}
+
+void SimpleSystem::loadDove()
+{
+    std::ifstream infile("dovetest.obj");
+    char buffer[1024];
+
+    while( infile.getline(buffer, 1024) )
+    {
+        stringstream ss(buffer);
+        Vector3f v;
+        string s;
+        ss >> s;
+
+        if ( s == "v" )
+        {
+            ss >> v[0] >> v[1] >> v[2];
+            vecv.push_back(v);
+        }
+        else if ( s == "vn" )
+        {
+            ss >> v[0] >> v[1] >> v[2];
+            vecn.push_back(v);
+        }
+        else if ( s == "f" )
+        {
+            vector<unsigned> vec;
+            char delimiter = '/';
+            string s;
+            for( int i = 0; i < 3; i++)
+            {
+            ss >> s;
+            int i1, i2, i3;
+            stringstream face_ind(s);
+            face_ind >> i1 >> delimiter >> i2 >> delimiter >> i3;
+            vec.push_back(i1);
+            vec.push_back(i2);
+            vec.push_back(i3);
+            }
+            vecf.push_back(vec);
+        }
+    }
 }
