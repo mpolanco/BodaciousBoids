@@ -8,7 +8,7 @@ SimpleSystem::SimpleSystem()
 {
 	m_numParticles = 10;
 	for (int i=0; i < m_numParticles; i++) {
-		Vector3f pos = Vector3f(i*0.4, i*randf(), 0);
+		Vector3f pos = Vector3f(i*0.4, randf(), 0);
 		Vector3f vel = Vector3f(0, 0, 0);
 
 		m_vVecState.push_back(pos);
@@ -73,14 +73,14 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 
 		// Cohesion
 		Vector3f perceived_center = perceivedCenter(flockCenter, pos_i);
-		cohesiveForce = (perceived_center - pos_i)/ 20;
+		cohesiveForce = (perceived_center - pos_i) / 5;
 		
 		forces+=sepForce;
 		forces+=alignForce;
 		forces+=cohesiveForce;		
 
-		f.push_back(vel_i+forces);
-		f.push_back(Vector3f::ZERO);
+		f.push_back(vel_i);
+		f.push_back(forces);
 	}
 
 	return f;
