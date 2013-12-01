@@ -164,7 +164,7 @@ inline void SimpleSystem::drawDove()
 
 void SimpleSystem::loadDove()
 {
-    std::ifstream infile("dovetest.obj");
+    std::ifstream infile("dove_detail.obj");
     char buffer[1024];
 
     while( infile.getline(buffer, 1024) )
