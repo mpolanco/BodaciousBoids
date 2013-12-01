@@ -35,6 +35,8 @@ protected:
         return ((float) rand()) /  (float) RAND_MAX ;
     }
 
+    float rad_to_deg(float rad);
+
     //Testing dove drawing
     void loadDove();
     void drawDove();

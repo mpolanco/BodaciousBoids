@@ -124,25 +124,26 @@ void SimpleSystem::draw()
 	glutSolidSphere(0.075f,10.0f,10.0f);
 	glPopMatrix();
 
-	for (int i=0; i < m_numParticles; i+=2) {
-		Vector3f pos = m_vVecState[i]; // PARTICLE POSITION
-		Vector3f vel = m_vVecState[i+1]; // PARTICLE VELOCITY
-		Vector3f top = -vel.normalized();
+	for (int i=0; i < m_numParticles; i++) {
+		Vector3f pos = m_vVecState[2*i]; // PARTICLE POSITION
+		Vector3f vel = m_vVecState[2*i+1].normalized(); // PARTICLE VELOCITY
 
+		// float rotx = rad_to_deg( acos( Vector3f::dot(vel, Vector3f::RIGHT) ));
+		// float roty = rad_to_deg( acos( Vector3f::dot(vel, Vector3f::UP) ));
+		// float rotz = rad_to_deg( acos(Vector3f::dot(vel, Vector3f::FORWARD) ));
+		float angle = rad_to_deg (acos(Vector3f::dot(vel, Vector3f::FORWARD)));
 		glPushMatrix();
 		glTranslatef(pos[0], pos[1], pos[2] );
-		// glEnable(GL_COLOR_MATERIAL);
-		// glColor3f(.2, .2, .1*i);
-		// glDisable(GL_COLOR_MATERIAL);
+		// glRotatef(rotx, 1, 0, 0);  
+	 //    glRotatef(roty, 0, 1, 0);  
+	 //    glRotatef(rotz, 0, 0, 1);
+	    glRotatef(angle, vel.x(), vel.y(), vel.z());
+		glEnable(GL_COLOR_MATERIAL);
+		glColor3f(.2, .2, .1*i);
+		glDisable(GL_COLOR_MATERIAL);
 		drawDove();
 
 		// glutSolidSphere(0.075f,10.0f,10.0f);
-		// glBegin(GL_TRIANGLES);
-		// glVertex(top);
-		// glVertex3f(-0.5f, -0.5f, -0.5f);
-		// glVertex3f(0.5f, 0.5f, 0.5f);
-		// glEnd();
-
 		glPopMatrix();
 	}
 }
@@ -202,4 +203,9 @@ void SimpleSystem::loadDove()
             vecf.push_back(vec);
         }
     }
+}
+
+float SimpleSystem::rad_to_deg(float rad)
+{
+	return (rad *180) / M_PI;
 }
