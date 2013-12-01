@@ -27,6 +27,8 @@ SimpleSystem::SimpleSystem()
 vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 {
 	vector<Vector3f> f;
+	Vector3f flockCenter = centerOfMass(state);
+	cout << "Flock center: " << flockCenter.x() << ", " << flockCenter.y() << ", " << flockCenter.z() << endl;
 
 	// for each particle in the state
 	// evaluate actual forces, except anchor the first particle
@@ -38,20 +40,44 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 		Vector3f forces = Vector3f::ZERO;
 
 		// Separation
+		Vector3f sepForce = Vector3f::ZERO;
+		float numTooClose = 0;
+		// Alignment
+		Vector3f alignForce = Vector3f::ZERO;
+		// Cohesion 
+		Vector3f cohesiveForce = Vector3f::ZERO;
+
 		for(int j=0; j < state.size(); j+=2) {
 			Vector3f pos_j = state[j];
+			Vector3f vel_j = state[j+1];
+
 			if (i == j) {
 				continue;
 			}
+
+			// Separation
 			Vector3f diff = pos_i - pos_j;
-			if ( diff.absSquared() < minSquaredSeparation ) {
-				forces-= diff;
+			float dist = diff.absSquared();
+			if ( dist < minSquaredSeparation ) {
+				sepForce-= (diff) ;
+				numTooClose++;
 			}
+
+			// Alignment
+
 		}
 
-		// Alignment
+		if (numTooClose > 0) { // avoid dividing by zero
+			sepForce*= (1/numTooClose); // average the separation forces
+		}
 
 		// Cohesion
+		Vector3f perceived_center = perceivedCenter(flockCenter, pos_i);
+		cohesiveForce = (perceived_center - pos_i);
+		
+		forces+=sepForce;
+		forces+=alignForce;
+		forces+=cohesiveForce;		
 
 		f.push_back(vel_i);
 		f.push_back(forces);
@@ -67,7 +93,15 @@ Vector3f SimpleSystem::centerOfMass(vector<Vector3f> state)
 	for(int i=0; i < state.size(); i+=2) {
 		summedPos+= state[i];
 	}
+	summedPos.print();
 	return summedPos/numPos;
+}
+
+Vector3f SimpleSystem::perceivedCenter(Vector3f centerOfMass, Vector3f position) 
+{
+	Vector3f perceived = centerOfMass - (position/m_numParticles);
+	perceived*= m_numParticles/ (m_numParticles-1);
+	return perceived;
 }
 
 

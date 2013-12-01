@@ -21,7 +21,7 @@ public:
 	void draw();
 
     Vector3f centerOfMass(vector<Vector3f> positions);
-
+    Vector3f perceivedCenter(Vector3f centerOfMass, Vector3f position);
 protected:
     float minSeparation;
     float minSquaredSeparation;
