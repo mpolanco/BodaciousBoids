@@ -4,10 +4,13 @@
 using namespace std;
 
 // Repurposed for Flock
-SimpleSystem::SimpleSystem()
+
+SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 {
 	areParticlesVisible = false;
-	m_numParticles = 10;
+	m_numParticles = numBirds + numPredators;
+    m_numBirds = numBirds;
+    m_numPredators = numPredators;
 
     // push the goal's pos and vel first before any birds
     m_goalPos = Vector3f(0,0,0);
@@ -15,7 +18,8 @@ SimpleSystem::SimpleSystem()
     m_vVecState.push_back(m_goalPos);
     m_vVecState.push_back(m_goalVel);
 
-	for (int i=0; i < m_numParticles; i++) {
+    birdStartIndex = 2;
+	for (int i=0; i < numBirds; i++) {
 		Vector3f pos = Vector3f(i*0.4, randf(), randf());
 		Vector3f vel = Vector3f(0, randf(), 0);
 
@@ -23,9 +27,20 @@ SimpleSystem::SimpleSystem()
 		m_vVecState.push_back(vel);
 	}
 
+    predatorStartIndex = m_vVecState.size();
+    for (int j=0; j < numPredators; j++) {
+        Vector3f pos = Vector3f(1, 1, 1);
+        Vector3f vel = Vector3f(0, 0, 0);
+
+        m_vVecState.push_back(pos);
+        m_vVecState.push_back(vel);
+    }
+
 	minSeparation = 1.0f;
 	neighborCutoff = 3.0f;
-    maxVelocity = 1.2f;
+    maxVelocityBird = 1.2f;
+    maxVelocityPredator = 1.5f * maxVelocityBird;
+    predatorSeparation = 2.5f;
 	cout << "Init: articles should have minimum Separation: " << minSeparation << endl;
 	MAX_BUFFER_SIZE = 100;
 	loadDove();
@@ -47,7 +62,7 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 
 	// for each particle in the state
 	// evaluate actual forces, except anchor the first particle
-	for(int i=2; i < state.size(); i+=2) {
+	for(int i=birdStartIndex; i < predatorStartIndex; i+=2) {
 		// get the particles position and velocity
 		Vector3f pos_i = state[i];
 		Vector3f vel_i = state[i+1];
@@ -66,7 +81,7 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
         Vector3f goalForce = (goalPos - pos_i);
 
         // For each other bird, determine separation and alignment forces
-		for(int j=2; j < state.size(); j+=2) {
+		for(int j=birdStartIndex; j < predatorStartIndex; j+=2) {
 			Vector3f pos_j = state[j];
 			Vector3f vel_j = state[j+1];
 
@@ -113,9 +128,9 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 
         // Limit the velocity of the birds
         Vector3f vel_new = vel_i + forces;
-        if (vel_new.abs() > maxVelocity) {
+        if (vel_new.abs() > maxVelocityBird) {
             vel_new.normalize();
-            vel_new*= maxVelocity;
+            vel_new*= maxVelocityBird;
         }
 		forces.normalize();
 
@@ -124,17 +139,25 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 		f.push_back(forces);
 	}
 
+    for(int p=predatorStartIndex; p < state.size(); p+=2) {
+        // get the particles position and velocity
+        Vector3f pos_pred = state[p];
+        Vector3f vel_pred = state[p+1];
+        f.push_back(vel_pred);
+        f.push_back(Vector3f::ZERO);
+    }
+
 	return f;
 }
 
+// takes a full state vector and computs the center of mass of just the birds in the state
 Vector3f SimpleSystem::centerOfMass(vector<Vector3f> state)
 {
 	Vector3f summedPos = Vector3f::ZERO;
-	float numPos = state.size()/2;
-	for(int i=0; i < state.size(); i+=2) {
+	for(int i=birdStartIndex; i < predatorStartIndex; i+=2) {
 		summedPos+= state[i];
 	}
-	summedPos*= (1.0 / numPos);
+	summedPos*= (1.0 / m_numBirds);
 	return summedPos;
 }
 
@@ -155,12 +178,14 @@ void SimpleSystem::step() {
 // render the system (ie draw the particles/birds)
 void SimpleSystem::draw()
 {
+    /* DRAW THE FLOCK CENTER */
 	Vector3f flockCenter = centerOfMass(m_vVecState);
 	glPushMatrix();
 	glTranslatef(flockCenter[0], flockCenter[1], flockCenter[2]);
 	glutSolidSphere(0.075f,10.0f,10.0f);
 	glPopMatrix();
 
+    /* DRAW THE GOAL */
     glPushMatrix();
     glTranslatef(m_goalPos[0], m_goalPos[1], m_goalPos[2]);
     glEnable(GL_COLOR_MATERIAL);
@@ -169,17 +194,18 @@ void SimpleSystem::draw()
     glutSolidSphere(0.075f,10.0f,10.0f);
     glPopMatrix();
 
-	for (int i=0; i < m_numParticles; i++) {
+    /* DRAW THE BIRDS */
+	for (int i=birdStartIndex; i < predatorStartIndex; i+=2) {
 
-		Vector3f pos = m_vVecState[2*i+2]; // PARTICLE POSITION
+		Vector3f pos = m_vVecState[i]; // PARTICLE POSITION
 		glPushMatrix();
 		glTranslatef(pos[0], pos[1], pos[2] );
 		glEnable(GL_COLOR_MATERIAL);
-		glColor3f(.2, .2, i*1.0/m_numParticles);
+		glColor3f(.2, .2, (i/2)*1.0/m_numBirds);
 		glDisable(GL_COLOR_MATERIAL);
 
 		if (areParticlesVisible) { // display birds
-			Vector3f vel = m_vVecState[2*i+1+2].normalized(); // PARTICLE VELOCITY
+			Vector3f vel = m_vVecState[i+1].normalized(); // PARTICLE VELOCITY
 			float angle = rad_to_deg (acos(Vector3f::dot(vel, Vector3f::FORWARD)));
 		    glRotatef(angle, vel.x(), vel.y(), vel.z());
 		    drawDove();
@@ -190,6 +216,18 @@ void SimpleSystem::draw()
 		
 		glPopMatrix();
 	}
+
+    /* DRAW THE PREDATORS */
+    for (int j = predatorStartIndex; j < m_vVecState.size(); j+=2) {
+        Vector3f predator_pos = m_vVecState[j]; // Predator POSITION
+        glPushMatrix();
+        glTranslatef(predator_pos[0], predator_pos[1], predator_pos[2] );
+        glEnable(GL_COLOR_MATERIAL);
+        glColor3f(0.54, 0.27, 0.074);
+        glDisable(GL_COLOR_MATERIAL);
+        glutSolidSphere(0.075f,10.0f,10.0f);        
+        glPopMatrix();
+    }
 }
 
 inline void SimpleSystem::drawDove()
@@ -260,12 +298,6 @@ float SimpleSystem::rad_to_deg(float rad)
 }
 
 void SimpleSystem::shiftRoot(Vector3f delta) {
-    cout << "Goal position: ";
-    m_goalPos.print();
-    cout << endl;
     m_goalVel+=delta;
     m_vVecState[1] = m_goalVel;
-    cout << "New goal velocity: ";
-    m_goalVel.print();
-    cout << endl;
 }

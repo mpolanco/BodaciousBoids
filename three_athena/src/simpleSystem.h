@@ -17,7 +17,8 @@ using namespace std;
 class SimpleSystem: public ParticleSystem
 {
 public:
-	SimpleSystem();
+
+	SimpleSystem(int numBirds, int numPredators);
 	
 	vector<Vector3f> evalF(vector<Vector3f> state);
 	
@@ -28,35 +29,46 @@ public:
     void step();
 
 protected:
+    /* BIRD VARIABLES AND METHODS */
+    int birdStartIndex; // the first index of birds in the state vector
+    int m_numBirds;
+
     float minSeparation;
     float neighborCutoff;
-    float maxVelocity;
+    float maxVelocityBird;
 
     Vector3f m_goalPos;
     Vector3f m_goalVel;
 
     Vector3f perceivedCenter(Vector3f centerOfMass, Vector3f position);
 
-    float randf() {
-        return ((float) rand()) /  (float) RAND_MAX ;
-    }
+    // Returns a random float between 0 and 1
+    float randf() { return ((float) rand()) / (float) RAND_MAX ;}
 
+    // Converts radians to degrees
     float rad_to_deg(float rad);
 
-    //Testing dove drawing
-    void loadDove();
-    void drawDove();
+    /* PREDATOR VARIABLES AND METHODS */
+    int predatorStartIndex; // the first index of predators in the state vector
+    int m_numPredators;
+    
+    float predatorSeparation;
+    float maxVelocityPredator;
 
-    // Globals
-    int MAX_BUFFER_SIZE;
-    // This is the list of points (3D vectors)
-    vector<Vector3f> vecv;
+    /* 
+        DOVE METHODS AND VARIABLES 
+    */
+        void loadDove();
+        void drawDove();
 
-    // This is the list of normals (also 3D vectors)
-    vector<Vector3f> vecn;
-
-    // This is the list of faces (indices into vecv and vecn)
-    vector<vector<unsigned> > vecf;
+        // Globals for loading dove
+        int MAX_BUFFER_SIZE;
+        // This is the list of points (3D vectors)
+        vector<Vector3f> vecv;
+        // This is the list of normals (also 3D vectors)
+        vector<Vector3f> vecn;
+        // This is the list of faces (indices into vecv and vecn)
+        vector<vector<unsigned> > vecf;
 };
 
 #endif
