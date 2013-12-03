@@ -24,10 +24,16 @@ public:
 	void draw();
 
     Vector3f centerOfMass(vector<Vector3f> positions);
+    void shiftRoot(Vector3f delta);
+    void step();
 
 protected:
     float minSeparation;
     float neighborCutoff;
+    float maxVelocity;
+
+    Vector3f m_goalPos;
+    Vector3f m_goalVel;
 
     Vector3f perceivedCenter(Vector3f centerOfMass, Vector3f position);
 

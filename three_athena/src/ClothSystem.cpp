@@ -209,9 +209,9 @@ vector<Vector3f> ClothSystem::evalF(vector<Vector3f> state)
 	}
 
 	//keep initial particles at rest
-	f[0] = rootVel;
+	f[0] = rootDelta;
 	f[1] = Vector3f(0,0,0);
-	f[(CLOTH_WIDTH-1) * 2] = rootVel;
+	f[(CLOTH_WIDTH-1) * 2] = rootDelta;
 	f[(CLOTH_WIDTH-1) * 2 + 1] = Vector3f(0,0,0);
 
 	shiftRoot(Vector3f::ZERO);

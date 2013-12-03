@@ -27,13 +27,13 @@ using namespace std;
 namespace
 {
 
-    ParticleSystem *system;
+    SimpleSystem *system;
     TimeStepper * timeStepper;
     // speed when pressing arrow keys
-    const float SHIFT_SPEED = 5.0;
+    const float SHIFT_SPEED = 1.0;
 
     float STEP_SIZE = 0.04f; //Works for RK4
-    //float STEP_SIZE = 0.008f; //Works for Trapzoidal
+    // float STEP_SIZE = 0.008f; //Works for Trapzoidal
 
   // initialize your particle systems
   ///TODO: read argv here. set timestepper , step size etc
@@ -69,6 +69,7 @@ namespace
   {
     if(timeStepper!=0){
       timeStepper->takeStep(system,STEP_SIZE);
+      system->step();
     }
   }
 
@@ -82,16 +83,13 @@ namespace
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, particleColor);
     
     glutSolidSphere(0.1f,10.0f,10.0f);
-    
     system->draw();
-    
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
     glPushMatrix();
     glTranslatef(0.0f,-5.0f,0.0f);
     glScaled(50.0f,0.01f,50.0f);
     glutSolidCube(1);
     glPopMatrix();
-    
   }
         
 
@@ -134,10 +132,10 @@ namespace
             system = new SimpleSystem();
             break;
         case '2':
-            system = new PendulumSystem(4);
+            // system = new PendulumSystem(4);
             break;
         case '3':
-            system = new ClothSystem();
+            // system = new ClothSystem();
             break;
         case 's':
             cout << "Toggling spring visibility" << endl;
@@ -359,7 +357,7 @@ int main( int argc, char* argv[] )
     camera.SetDistance( 10 );
     camera.SetCenter( Vector3f::ZERO );
 
-    glutCreateWindow("Assignment 3");
+    glutCreateWindow("BodaciousBoids");
 
     // Initialize OpenGL parameters.
     initRendering();
@@ -383,7 +381,8 @@ int main( int argc, char* argv[] )
 
     // Trigger timerFunc every 20 msec
     glutTimerFunc(20, timerFunc, 20);
-       
+    
+    cout << " Starting main loop " << endl;
     // Start the main loop.  glutMainLoop never returns.
     glutMainLoop();
 

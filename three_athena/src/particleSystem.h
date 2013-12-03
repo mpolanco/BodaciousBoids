@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <vecmath.h>
+#include <iostream>
 
 using namespace std;
 
@@ -29,17 +30,20 @@ public:
 	void toggleParticles(){ areParticlesVisible = !areParticlesVisible; };	
 	void toggleWind(){ wind = !wind; };	
 
-	void shiftRoot(Vector3f velocity){rootVel = velocity;};
+	void shiftRoot(Vector3f delta){rootDelta = delta;};
 	
 	// setter method for the system's state
 	void setState(const vector<Vector3f>  & newState) { m_vVecState = newState; };
+
+	void step() { time_step++; }
 	
 	virtual void draw() = 0;
 	
 protected:
 
 	vector<Vector3f> m_vVecState;
-	Vector3f rootVel;
+	Vector3f rootDelta;
+	int time_step;
 };
 
 #endif

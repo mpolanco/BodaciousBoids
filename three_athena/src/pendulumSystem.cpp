@@ -108,7 +108,7 @@ vector<Vector3f> PendulumSystem::evalF(vector<Vector3f> state)
 	}
 
 	//keep initial particle at rest
-	f[0] = rootVel;
+	f[0] = rootDelta;
 	f[1] = Vector3f(0,0,0);
 
 	shiftRoot(Vector3f::ZERO);
