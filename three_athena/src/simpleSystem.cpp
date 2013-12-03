@@ -120,7 +120,7 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 		forces.normalize();
 
 		f.push_back(vel_i+forces);
-        // forces+= evalViscousDrag(vel_i+forces);
+        forces+= evalViscousDrag(vel_i+forces);
 		f.push_back(forces);
 	}
 
