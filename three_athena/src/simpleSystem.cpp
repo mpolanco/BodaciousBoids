@@ -43,7 +43,7 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
     Vector3f goalVel = state[1];
 
     f.push_back(goalVel);
-    f.push_back(Vector3f::ZERO);
+    f.push_back(evalViscousDrag(goalVel));
 
 	// for each particle in the state
 	// evaluate actual forces, except anchor the first particle
@@ -120,6 +120,7 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 		forces.normalize();
 
 		f.push_back(vel_i+forces);
+        // forces+= evalViscousDrag(vel_i+forces);
 		f.push_back(forces);
 	}
 
@@ -251,7 +252,6 @@ void SimpleSystem::loadDove()
             vecf.push_back(vec);
         }
     }
-    //infile.close();
 }
 
 float SimpleSystem::rad_to_deg(float rad)

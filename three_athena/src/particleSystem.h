@@ -44,6 +44,9 @@ protected:
 	vector<Vector3f> m_vVecState;
 	Vector3f rootDelta;
 	int time_step;
+	float DRAG_CONSTANT;
+
+	Vector3f evalViscousDrag(Vector3f vel);
 };
 
 #endif
