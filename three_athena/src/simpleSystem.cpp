@@ -150,10 +150,12 @@ void SimpleSystem::draw()
 
 inline void SimpleSystem::drawDove()
 {
+    //cout << "start" << endl;
     for( unsigned int i=0; i < vecf.size(); i++ )
     {
         glBegin(GL_TRIANGLES);
         glNormal3d(vecn[vecf[i][2]-1][0], vecn[vecf[i][2]-1][1], vecn[vecf[i][2]-1][2]);
+        //cout<< "end" << endl;
         glVertex3d(vecv[vecf[i][0]-1][0], vecv[vecf[i][0]-1][1], vecv[vecf[i][0]-1][2]);
         glNormal3d(vecn[vecf[i][5]-1][0], vecn[vecf[i][5]-1][1], vecn[vecf[i][5]-1][2]);
         glVertex3d(vecv[vecf[i][3]-1][0], vecv[vecf[i][3]-1][1], vecv[vecf[i][3]-1][2]);
@@ -161,14 +163,17 @@ inline void SimpleSystem::drawDove()
         glVertex3d(vecv[vecf[i][6]-1][0], vecv[vecf[i][6]-1][1], vecv[vecf[i][6]-1][2]);
         glEnd();
     }
+    //cout<< "end" << endl;
 }
 
 void SimpleSystem::loadDove()
 {
-    std::ifstream infile("dove_detail.obj");
-    char buffer[1024];
+    std::ifstream infile("dove_simple_test.obj");
+    char buffer[2048];
+    vecn.clear();
+    vecf.clear();
 
-    while( infile.getline(buffer, 1024) )
+    while( infile.getline(buffer, 2048) )
     {
         stringstream ss(buffer);
         Vector3f v;
@@ -203,6 +208,7 @@ void SimpleSystem::loadDove()
             vecf.push_back(vec);
         }
     }
+    //infile.close();
 }
 
 float SimpleSystem::rad_to_deg(float rad)
