@@ -16,14 +16,7 @@ public:
 	void draw();
 
 private:
-	Vector3f GRAVITY;
-	float DRAG;
-	
-	void initSpringTies();
-	void initMasses();
 
-	std::vector< std::vector<Spring> > springTies;
-	std::vector<float> masses;
 };
 
 #endif

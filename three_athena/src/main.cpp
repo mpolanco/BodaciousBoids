@@ -36,6 +36,8 @@ namespace
     // float STEP_SIZE = 0.008f; //Works for Trapzoidal
     bool FOLLOW_MODE = false;
     bool FIRST_PERSON = false;
+    int numInitialBirds = 10;
+    int numInitialPredators = 1;
 
   // initialize your particle systems
   ///TODO: read argv here. set timestepper , step size etc
@@ -43,7 +45,7 @@ namespace
   {
     // seed the random number generator with the current time
     srand( time( NULL ) );
-    system = new SimpleSystem();
+    system = new SimpleSystem(numInitialBirds, numInitialPredators);
     //system = new PendulumSystem(3);
     // system = new ClothSystem();
     
@@ -131,7 +133,7 @@ namespace
             break;
         }
         case '1':
-            system = new SimpleSystem();
+            system = new SimpleSystem(numInitialBirds, numInitialPredators);
             break;
         case '2':
             // system = new PendulumSystem(4);
@@ -139,9 +141,13 @@ namespace
         case '3':
             // system = new ClothSystem();
             break;
+        case 'd':
+            cout << "Setting default goal" << endl;
+            system->setGoalPattern(system->GOAL_DEFAULT);
+            break;
         case 's':
-            cout << "Toggling spring visibility" << endl;
-            system->toggleSprings();
+            cout << "Setting circular goal" << endl;
+            system->setGoalPattern(system->GOAL_CIRCULAR);
             break;
         case 'e':
            break;
@@ -182,19 +188,19 @@ namespace
         switch ( key )
         {
             case KB_UP:
-                cout << "shifting up" << endl;
+                // cout << "shifting up" << endl;
                 system->shiftRoot(Vector3f(0,SHIFT_SPEED,0));
                 break;
             case KB_DOWN:
-                cout << "shifting down" << endl;
+                // cout << "shifting down" << endl;
                 system->shiftRoot(Vector3f(0, -1.0 * SHIFT_SPEED,0));
                 break;
             case KB_LEFT:
-                cout << "shifting left" << endl;
+                // cout << "shifting left" << endl;
                 system->shiftRoot(Vector3f(-1.0 * SHIFT_SPEED,0,0));
                 break;
             case KB_RIGHT:
-                cout << "shifting right" << endl;
+                // cout << "shifting right" << endl;
                 system->shiftRoot(Vector3f(SHIFT_SPEED,0,0));
                 break;
             default:
