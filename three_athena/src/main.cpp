@@ -38,7 +38,7 @@ namespace
     bool FIRST_PERSON = false;
     int BIRD_POSITION_INDEX = 0;
     int numInitialBirds = 10;
-    int numInitialPredators = 1;
+    int numInitialPredators = 2;
 
   // initialize your particle systems
   ///TODO: read argv here. set timestepper , step size etc

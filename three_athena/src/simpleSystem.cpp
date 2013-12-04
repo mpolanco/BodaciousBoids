@@ -34,8 +34,8 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 
     predatorStartIndex = m_vVecState.size();
     for (int j=0; j < numPredators; j++) {
-        Vector3f pos = Vector3f(1, 1, 1);
-        Vector3f vel = Vector3f(0, 0, 0);
+        Vector3f pos = Vector3f(-randf(), 1, 1);
+        Vector3f vel = Vector3f(randf(), randf(), randf());
 
         m_vVecState.push_back(pos);
         m_vVecState.push_back(vel);
@@ -170,11 +170,27 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
         // get the particles position and velocity
         Vector3f pos_pred = state[p];
         Vector3f vel_pred = state[p+1];
+        Vector3f forces = Vector3f::ZERO;
 
-        // find the closest prey
+        // find the closest prey and follow it
         int birdIndex = findClosestPrey(state, pos_pred);
+        forces+= (state[birdIndex] - pos_pred);
 
-        Vector3f forces = (state[birdIndex] - pos_pred);
+        // avoid the other predators
+        for(int j=predatorStartIndex; j < state.size(); j+=2) {
+            if (p == j) { continue; }
+
+            Vector3f pos_other_pred = state[j];
+            Vector3f diff = (pos_pred - pos_other_pred);
+            float dist = diff.abs();
+            if (dist < neighborCutoff) {
+                if (dist == 0.0) {
+                    dist = 0.01;
+                    diff = Vector3f(1,1,0);
+                }
+                forces+= (diff.normalized() / dist);
+            }
+        }
 
         // set velocity and aceleration vectors
         Vector3f vel_new = vel_pred + forces;
@@ -267,6 +283,9 @@ void SimpleSystem::draw()
     /* DRAW THE PREDATORS */
     for (int j = predatorStartIndex; j < m_vVecState.size(); j+=2) {
         Vector3f predator_pos = m_vVecState[j]; // Predator POSITION
+        // cout << "Drawing predator at ";
+        // predator_pos.print();
+        // cout << endl;
         glPushMatrix();
         glTranslatef(predator_pos[0], predator_pos[1], predator_pos[2] );
         glEnable(GL_COLOR_MATERIAL);
