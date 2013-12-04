@@ -223,6 +223,11 @@ Vector3f SimpleSystem::perceivedCenter(Vector3f centerOfMass, Vector3f position)
 	return centerOfMass;
 }
 
+Vector3f SimpleSystem::getRandomPosition()
+{
+    return getState()[0];
+}
+
 void SimpleSystem::step() { 
     time_step++; 
     updateGoal(time_step);

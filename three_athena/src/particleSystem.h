@@ -24,6 +24,8 @@ public:
 	// getter method for the system's state
 	vector<Vector3f> getState(){ return m_vVecState; };
 
+	virtual Vector3f getRandomPosition() = 0;
+
 	//toggles spring visibility
 	void toggleSprings(){ areSpringsVisible = !areSpringsVisible; };
 	void toggleParticles(){ areParticlesVisible = !areParticlesVisible; };	

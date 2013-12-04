@@ -34,6 +34,8 @@ namespace
 
     float STEP_SIZE = 0.04f; //Works for RK4
     // float STEP_SIZE = 0.008f; //Works for Trapzoidal
+    bool FOLLOW_MODE = false;
+    bool FIRST_PERSON = false;
     int numInitialBirds = 10;
     int numInitialPredators = 2;
 
@@ -163,6 +165,14 @@ namespace
             cout << "Toggling wind" << endl;
             system->toggleWind();
             break;
+        case 'b':
+            cout << "Triggering follow mode"<< endl;
+            FOLLOW_MODE = !FOLLOW_MODE;
+            break;
+        case 'v':
+            cout << "Toggling perspective" << endl;
+            FIRST_PERSON = !FIRST_PERSON;
+            break;
         default:
             cout << "Unhandled key press " << key << "." << endl;        
         }
@@ -275,6 +285,20 @@ namespace
     // This function is responsible for displaying the object.
     void drawScene(void)
     {
+        //Code to follow a bird
+        if (FOLLOW_MODE)
+        {
+            camera.SetCenter(system->getRandomPosition());
+        }
+        /*if (FIRST_PERSON)
+        {
+            camera.SetDistance(0);
+        }
+        else
+        {
+            camera.SetDistance(10);
+        }*/
+
         // Clear the rendering window
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
