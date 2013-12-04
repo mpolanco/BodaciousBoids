@@ -11,6 +11,12 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
     GOAL_CIRCULAR = 1;
     GOAL_ZIGZAG = 2;
 
+    xDim = 4;
+    yDim = 4;
+    zDim = 4;
+    box_size = 4;
+    cout << "Bounding box X, Y, Z: " << xDim << ", " << yDim << ", " << zDim << endl;
+
 	areParticlesVisible = false;
 	m_numParticles = numBirds + numPredators;
     m_numBirds = numBirds;
@@ -291,10 +297,43 @@ void SimpleSystem::draw()
         glEnable(GL_COLOR_MATERIAL);
         glColor3f(0.54, 0.27, 0.074);
         glDisable(GL_COLOR_MATERIAL);
-        glutSolidSphere(0.075f,10.0f,10.0f);        
+        if (areParticlesVisible) { // display birds
+            Vector3f vel = m_vVecState[j+1].normalized(); // PARTICLE VELOCITY
+            float angle = rad_to_deg (acos(Vector3f::dot(vel, Vector3f::FORWARD)));
+            glScalef(1.5, 1.5, 1.5);
+            glRotatef(angle, vel.x(), vel.y(), vel.z());
+            drawDove();
+        } // otherwise display spheres
+        else {
+            glutSolidSphere(0.1f,10.0f,10.0f);
+        }       
         glPopMatrix();
     }
+
+    drawBoundingVertices();
+    drawObstacles();
 }
+
+void SimpleSystem::drawBoundingVertices() {
+    for(int x = -xDim; x <= xDim; x+= (2*xDim)) {
+       for(int y = -yDim; y <= yDim; y+= (2*yDim)) {
+            for(int z = -zDim; z <= zDim; z+= (2*zDim)) {
+                glPushMatrix();
+                glTranslatef(x, y, z);
+                glEnable(GL_COLOR_MATERIAL);
+                glColor3f(.8, .8, .8);
+                glDisable(GL_COLOR_MATERIAL);
+                glutSolidSphere(0.075f,10.0f,10.0f);
+                glPopMatrix();
+            }
+        } 
+    }
+}
+
+void SimpleSystem::drawObstacles() {
+
+}
+
 
 inline void SimpleSystem::drawDove()
 {

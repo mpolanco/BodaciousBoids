@@ -166,7 +166,7 @@ namespace
             system->toggleWind();
             break;
         case 'b':
-            cout << "Triggering follow mode"<< endl;
+            cout << "Toggling follow mode"<< endl;
             FOLLOW_MODE = !FOLLOW_MODE;
             if (FOLLOW_MODE)
             {
@@ -178,7 +178,7 @@ namespace
             }
             break;
         case 'v':
-            cout << "Toggling following bird" << endl;
+            cout << "Following random bird" << endl;
             if (FOLLOW_MODE)
             {
                 BIRD_POSITION_INDEX = system->getRandomBirdPositionIndex();

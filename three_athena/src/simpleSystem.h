@@ -24,6 +24,13 @@ public:
     int GOAL_CIRCULAR;
     int GOAL_ZIGZAG;
 
+    int xDim;
+    int yDim;
+    int zDim;
+
+    int box_size;
+
+
 	vector<Vector3f> evalF(vector<Vector3f> state);
 
     Vector3f getPositionAtIndex(int ind);
@@ -88,6 +95,11 @@ protected:
         vector<Vector3f> vecn;
         // This is the list of faces (indices into vecv and vecn)
         vector<vector<unsigned> > vecf;
+
+    /* OTHER METHODS */
+        void drawObstacles();
+        void drawBoundingVertices();
+
 };
 
 #endif
