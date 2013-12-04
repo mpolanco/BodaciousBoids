@@ -144,6 +144,11 @@ Vector3f SimpleSystem::perceivedCenter(Vector3f centerOfMass, Vector3f position)
 	return centerOfMass;
 }
 
+Vector3f SimpleSystem::getRandomPosition()
+{
+    return getState()[0];
+}
+
 void SimpleSystem::step() { 
     time_step++; 
     // Vector3f circular = Vector3f(cos(time_step/90.0f), sin(time_step/90.0f), 0);

@@ -20,6 +20,8 @@ public:
 	SimpleSystem();
 	
 	vector<Vector3f> evalF(vector<Vector3f> state);
+
+    Vector3f getRandomPosition();
 	
 	void draw();
 
