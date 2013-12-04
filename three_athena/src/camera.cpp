@@ -92,6 +92,8 @@ void Camera::MouseRelease(int x, int y)
     mStartRot = mCurrentRot;
     mStartCenter = mCurrentCenter;
     mStartDistance = mCurrentDistance;
+
+    cout << "mCurrentDistance: " << mCurrentDistance << endl;
     
     mButtonState = NONE;
 }

@@ -83,15 +83,64 @@ namespace
   {
     // Base material colors (they don't change)
     GLfloat particleColor[] = {0.4f, 0.7f, 1.0f, 1.0f};
-    GLfloat floorColor[] = {1.0f, 0.0f, 0.0f, 1.0f};
+    GLfloat floorColor[] = {0.0f, 1.0f, 0.0f, 1.0f};
+    GLfloat skyColor[] = {0.3f, 0.3f, 1.0f, 1.0f};
     
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, particleColor);
     
     glutSolidSphere(0.1f,10.0f,10.0f);
     system->draw();
+
+    //background
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
     glPushMatrix();
     glTranslatef(0.0f,-5.0f,0.0f);
+    glScaled(50.0f,0.01f,50.0f);
+    glutSolidCube(1);
+    glPopMatrix();
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, skyColor);
+
+    //top
+    glPushMatrix();
+    
+    glTranslatef(0.0f,25.0f,0.0f);
+    glRotatef(90,0.0f,1.0f,0.0f);
+    glScaled(50.0f,0.01f,50.0f);
+    glutSolidCube(1);
+    glPopMatrix();
+
+
+    glPushMatrix();
+    
+    glTranslatef(0.0f,0.0f,-25.0f);
+    glRotatef(90,-1.0f,0.0f,0.0f);
+    glScaled(50.0f,0.01f,50.0f);
+    glutSolidCube(1);
+    glPopMatrix();
+
+    glPushMatrix();
+    
+    glTranslatef(0.0f,0.0f,25.0f);
+    glRotatef(90,1.0f,0.0f,0.0f);
+    glScaled(50.0f,0.01f,50.0f);
+    glutSolidCube(1);
+    glPopMatrix();
+
+    
+
+    glPushMatrix();
+    
+    glTranslatef(-25.0f,0.0f,0.0f);
+    glRotatef(90,0.0f,0.0f,-1.0f);
+    glScaled(50.0f,0.01f,50.0f);
+    glutSolidCube(1);
+    glPopMatrix();
+
+    glPushMatrix();
+    
+    glTranslatef(25.0f,0.0f,0.0f);
+    glRotatef(90,0.0f,0.0f,1.0f);
     glScaled(50.0f,0.01f,50.0f);
     glutSolidCube(1);
     glPopMatrix();
@@ -185,6 +234,18 @@ namespace
                 BIRD_POSITION_INDEX = system->getRandomBirdPositionIndex();
             }
             break;
+        case 'c':
+            cout << "Toggling first person mode" << endl;
+            FIRST_PERSON = !FIRST_PERSON;
+            if (FIRST_PERSON)
+            {
+                camera.SetDistance(0.05);
+            }
+            else
+            {
+                camera.SetDistance(10);
+            }
+            break;
         default:
             cout << "Unhandled key press " << key << "." << endl;        
         }
@@ -224,6 +285,10 @@ namespace
     //  Called when mouse button is pressed.
     void mouseFunc(int button, int state, int x, int y)
     {
+        if (FIRST_PERSON)
+        {
+            return;
+        }
         if (state == GLUT_DOWN)
         {
             g_mousePressed = true;
@@ -302,14 +367,6 @@ namespace
         {
             camera.SetCenter(system->getPositionAtIndex(BIRD_POSITION_INDEX));
         }
-        /*if (FIRST_PERSON)
-        {
-            camera.SetDistance(0);
-        }
-        else
-        {
-            camera.SetDistance(10);
-        }*/
 
         // Clear the rendering window
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
