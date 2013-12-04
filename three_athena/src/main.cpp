@@ -103,7 +103,6 @@ namespace
 
     //top
     glPushMatrix();
-    
     glTranslatef(0.0f,25.0f,0.0f);
     glRotatef(90,0.0f,1.0f,0.0f);
     glScaled(50.0f,0.01f,50.0f);
@@ -112,7 +111,6 @@ namespace
 
 
     glPushMatrix();
-    
     glTranslatef(0.0f,0.0f,-25.0f);
     glRotatef(90,-1.0f,0.0f,0.0f);
     glScaled(50.0f,0.01f,50.0f);
@@ -120,7 +118,6 @@ namespace
     glPopMatrix();
 
     glPushMatrix();
-    
     glTranslatef(0.0f,0.0f,25.0f);
     glRotatef(90,1.0f,0.0f,0.0f);
     glScaled(50.0f,0.01f,50.0f);
@@ -130,7 +127,6 @@ namespace
     
 
     glPushMatrix();
-    
     glTranslatef(-25.0f,0.0f,0.0f);
     glRotatef(90,0.0f,0.0f,-1.0f);
     glScaled(50.0f,0.01f,50.0f);
@@ -138,7 +134,6 @@ namespace
     glPopMatrix();
 
     glPushMatrix();
-    
     glTranslatef(25.0f,0.0f,0.0f);
     glRotatef(90,0.0f,0.0f,1.0f);
     glScaled(50.0f,0.01f,50.0f);
