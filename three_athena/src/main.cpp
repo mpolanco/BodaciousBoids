@@ -37,8 +37,8 @@ namespace
     bool FOLLOW_MODE = false;
     bool FIRST_PERSON = false;
     int BIRD_POSITION_INDEX = 0;
-    int numInitialBirds = 10;
-    int numInitialPredators = 2;
+    int numInitialBirds = 15;
+    int numInitialPredators = 4;
 
   // initialize your particle systems
   ///TODO: read argv here. set timestepper , step size etc
@@ -56,11 +56,10 @@ namespace
     cout << "Step size is: " << STEP_SIZE << "\n" << endl;
     cout << "*****************************************************************************************************" << endl;
     cout << "* To move the cloth and pendulum systems, press and hold the arrow keys                             *" << endl;
-    cout << "* To toggle particles, press p                                                                      *" << endl;
-    cout << "* To toggle springs, press s                                                                        *" << endl;
-    cout << "* To create or restart the SimpleSystem, press 1                                                    *" << endl;
-    cout << "* To create or restart the PendulumSystem, press 2                                                  *" << endl;
-    cout << "* To create or restart the ClothSystem, press 3                                                     *" << endl;
+    cout << "* To toggle particles/birds, press p                                                                *" << endl;
+    cout << "* To set a circular goal, press s                                                                   *" << endl;
+    cout << "* To return the goal to default (user-controlled), press d                                          *" << endl;
+    cout << "* To create or restart the FlockSystem, press 1                                                     *" << endl;
     cout << "* To toggle wind, press w                                                                           *" << endl;
     cout << "* To exit press Escape                                                                              *" << endl;
     cout << "*****************************************************************************************************" << endl;
@@ -211,7 +210,7 @@ namespace
             system->toggleWind();
             break;
         case 'b':
-            cout << "Triggering follow mode"<< endl;
+            cout << "Toggling follow mode"<< endl;
             FOLLOW_MODE = !FOLLOW_MODE;
             if (FOLLOW_MODE)
             {
@@ -223,7 +222,7 @@ namespace
             }
             break;
         case 'v':
-            cout << "Toggling following bird" << endl;
+            cout << "Following random bird" << endl;
             if (FOLLOW_MODE)
             {
                 BIRD_POSITION_INDEX = system->getRandomBirdPositionIndex();

@@ -24,6 +24,10 @@ public:
     int GOAL_CIRCULAR;
     int GOAL_ZIGZAG;
 
+    Vector3f boxDims;
+    float reboundFactor;
+    float reboundZone;
+
 	vector<Vector3f> evalF(vector<Vector3f> state);
 
     Vector3f getPositionAtIndex(int ind);
@@ -39,7 +43,9 @@ public:
 protected:
     void updateGoal(int time_step);
 
-    /* BIRD VARIABLES AND METHODS */
+    /* 
+        BIRD VARIABLES AND METHODS 
+    */
     int birdStartIndex; // the first index of birds in the state vector
     int m_numBirds;
 
@@ -60,11 +66,14 @@ protected:
     Vector3f limitBirdVelocity(Vector3f vel);
     // Returns a random float between 0 and 1
     float randf() { return ((float) rand()) / (float) RAND_MAX ;}
+    float randf_sym() { return (((float) rand() * 2) / (float) RAND_MAX) - 1; }
 
     // Converts radians to degrees
     float rad_to_deg(float rad);
 
-    /* PREDATOR VARIABLES AND METHODS */
+    /* 
+        PREDATOR VARIABLES AND METHODS 
+    */
     int predatorStartIndex; // the first index of predators in the state vector
     int m_numPredators;
 
@@ -73,6 +82,24 @@ protected:
 
     int findClosestPrey(vector<Vector3f> state, Vector3f predator_pos);
     Vector3f limitPredatorVelocity(Vector3f vel);
+
+    /* 
+        OBSTACLE METHODS AND VARIABLES 
+    */
+        vector<Vector3f> sphereObstacles;
+        vector<float> sphereObstacleRadius;
+        float obstacleReboundZone;
+
+        void drawObstacles();
+        float randomObstacleSize();
+        Vector3f avoidObstacles(Vector3f position);
+
+    /* 
+        BOUNDING BOX METHODS AND VARIABLES 
+    */
+        void drawBoundingVertices();
+        Vector3f boundPosition(Vector3f position);
+        Vector3f randomPositionInBox();
 
     /* 
         DOVE METHODS AND VARIABLES 
@@ -88,6 +115,10 @@ protected:
         vector<Vector3f> vecn;
         // This is the list of faces (indices into vecv and vecn)
         vector<vector<unsigned> > vecf;
+
+    /* OTHER METHODS */
+        
+        
 };
 
 #endif

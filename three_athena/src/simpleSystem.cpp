@@ -11,6 +11,11 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
     GOAL_CIRCULAR = 1;
     GOAL_ZIGZAG = 2;
 
+    boxDims = Vector3f(4,4,4);
+    reboundFactor = 2.0f;
+    reboundZone = 0.1f;
+    cout << "Bounding box X, Y, Z: " << boxDims.x() << ", " << boxDims.y() << ", " << boxDims.z() << endl;
+
 	areParticlesVisible = false;
 	m_numParticles = numBirds + numPredators;
     m_numBirds = numBirds;
@@ -54,6 +59,15 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 	cout << "Init: articles should have minimum Separation: " << minSeparation << endl;
 	MAX_BUFFER_SIZE = 100;
 	loadDove();
+
+    /* Initialize Random obstacles */
+    obstacleReboundZone = 0.1;
+    int num_sphere_obstacles = 5;
+    for (int i=0; i<num_sphere_obstacles; i++) {
+        sphereObstacles.push_back(randomPositionInBox());
+        sphereObstacleRadius.push_back(randomObstacleSize());
+    }
+   
 }
 
 // evalF applies the three rules of boid flocking behavior
@@ -144,7 +158,6 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
             }
         }
 
-
 		// Cohesion
 		Vector3f perceived_center = perceivedCenter(flockCenter, pos_i);
 		cohesiveForce = (perceived_center - pos_i);
@@ -153,7 +166,10 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 		forces+= alignForce * alignWeight * scatter;
 		forces+= cohesiveForce * cohesiveWeight * scatter;
         forces+= goalForce * goalWeight * scatter;
-        forces+= evadeForce;	
+        forces+= evadeForce;
+        forces+= boundPosition(pos_i); // Stay in Bounds
+        forces+= avoidObstacles(pos_i); 
+        
 
         // Limit the velocity of the birds
         Vector3f vel_new = vel_i + forces;
@@ -191,6 +207,9 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
                 forces+= (diff.normalized() / dist);
             }
         }
+
+        forces+= boundPosition(pos_pred); // Stay in Bounds
+        forces+= avoidObstacles(pos_pred);
 
         // set velocity and aceleration vectors
         Vector3f vel_new = vel_pred + forces;
@@ -291,10 +310,58 @@ void SimpleSystem::draw()
         glEnable(GL_COLOR_MATERIAL);
         glColor3f(0.54, 0.27, 0.074);
         glDisable(GL_COLOR_MATERIAL);
-        glutSolidSphere(0.075f,10.0f,10.0f);        
+        if (areParticlesVisible) { // display birds
+            Vector3f vel = m_vVecState[j+1].normalized(); // PARTICLE VELOCITY
+            float angle = rad_to_deg (acos(Vector3f::dot(vel, Vector3f::FORWARD)));
+            glScalef(1.5, 1.5, 1.5);
+            glRotatef(angle, vel.x(), vel.y(), vel.z());
+            drawDove();
+        } // otherwise display spheres
+        else {
+            glutSolidSphere(0.1f,10.0f,10.0f);
+        }       
+        glPopMatrix();
+    }
+
+    drawBoundingVertices();
+    drawObstacles();
+}
+
+void SimpleSystem::drawBoundingVertices() {
+    float xDim = boxDims.x();
+    float yDim = boxDims.y();
+    float zDim = boxDims.z();
+
+    for(int x = -xDim; x <= xDim; x+= (2*xDim)) {
+       for(int y = -yDim; y <= yDim; y+= (2*yDim)) {
+            for(int z = -zDim; z <= zDim; z+= (2*zDim)) {
+                glPushMatrix();
+                glTranslatef(x, y, z);
+                glEnable(GL_COLOR_MATERIAL);
+                glColor3f(.8, .8, .8);
+                glDisable(GL_COLOR_MATERIAL);
+                glutSolidSphere(0.075f,10.0f,10.0f);
+                glPopMatrix();
+            }
+        } 
+    }
+}
+
+void SimpleSystem::drawObstacles() {
+    for(int i=0; i < sphereObstacles.size(); i++) {
+        Vector3f obstacle_pos = sphereObstacles[i];
+        float sphere_radius = sphereObstacleRadius[i];
+
+        glPushMatrix();
+        glTranslatef(obstacle_pos.x(), obstacle_pos.y(), obstacle_pos.z());
+        glEnable(GL_COLOR_MATERIAL);
+        glColor3f(1, 0.8549, 0.725);
+        glDisable(GL_COLOR_MATERIAL);
+        glutSolidSphere(sphere_radius,10.0f,10.0f);
         glPopMatrix();
     }
 }
+
 
 inline void SimpleSystem::drawDove()
 {
@@ -421,4 +488,48 @@ Vector3f SimpleSystem::limitPredatorVelocity(Vector3f vel) {
         vel*= maxVelocityPredator;
     }
     return vel;
+}
+
+Vector3f SimpleSystem::boundPosition(Vector3f position) {
+    Vector3f boundForce = Vector3f::ZERO;
+    for(int i=0; i < 3; i++) {
+        float distFromEdge = abs(position[i]) - boxDims[i];
+        if (distFromEdge > -reboundZone) {
+            int sign = (position[i] > 0) ? -1 : 1; // sign of repelling force
+            boundForce[i] = (distFromEdge + reboundZone) * sign;
+
+        }  
+    }
+
+    return boundForce * reboundFactor; // bounding force
+}
+
+Vector3f SimpleSystem::randomPositionInBox() {
+    Vector3f randPos = Vector3f::ZERO;
+    for(int i=0; i<3; i++) {
+        float pos = randf() * boxDims[i] * 2;
+        pos-= boxDims[i];
+        randPos[i] = pos;
+    }
+    return randPos;
+}
+
+float SimpleSystem::randomObstacleSize() {
+    float baseSize = 0.1f;
+    float randDiff = randf_sym() * 0.05;
+    return baseSize + randDiff;
+}
+
+Vector3f SimpleSystem::avoidObstacles(Vector3f position) {
+    Vector3f avoidForce = Vector3f::ZERO;
+    for(int i=0; i < sphereObstacles.size(); i++) {
+        Vector3f pos_obs = sphereObstacles[i];
+        float obs_rad = sphereObstacleRadius[i];
+        Vector3f diff = position - pos_obs;
+        float dist = diff.abs();
+        if (dist < obs_rad + obstacleReboundZone) {
+            avoidForce+= diff.normalized() / dist;
+        }
+    }
+    return avoidForce;
 }
