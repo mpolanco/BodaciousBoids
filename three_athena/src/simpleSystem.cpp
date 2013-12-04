@@ -307,31 +307,24 @@ void SimpleSystem::shiftRoot(Vector3f delta) {
 
 void SimpleSystem::setGoalPattern(int patternId) {
     goalPatternId = patternId;
-    switch(patternId) {
-        case 1:
-            break;
-        default:
-            break;
-    }
 }
 
 void SimpleSystem::updateGoal(int time_step) {
-    m_goalPos = m_vVecState[0];
-    m_goalVel = m_vVecState[1];
-
     switch (goalPatternId) {
         case 1: // Circular
         {
             Vector3f circular = Vector3f(2*cos(time_step/30.0f), 1.5*sin(time_step/30.0f), 0);
-            m_goalPos = circular;
-            m_vVecState[0] = m_goalPos;
+            m_vVecState[0] = circular;
             m_vVecState[1] = Vector3f::ZERO;
             break;
         }
         case 2: // Zig-zag
             break;
+
         case 0: // Static (user-input)
         default:
             break;
     }
+    m_goalPos = m_vVecState[0];
+    m_goalVel = m_vVecState[1];
 }

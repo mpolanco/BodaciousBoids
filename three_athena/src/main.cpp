@@ -139,6 +139,10 @@ namespace
         case '3':
             // system = new ClothSystem();
             break;
+        case 'd':
+            cout << "Setting default goal" << endl;
+            system->setGoalPattern(system->GOAL_DEFAULT);
+            break;
         case 's':
             cout << "Setting circular goal" << endl;
             system->setGoalPattern(system->GOAL_CIRCULAR);
