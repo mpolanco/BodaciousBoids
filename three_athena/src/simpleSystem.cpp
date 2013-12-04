@@ -7,12 +7,17 @@ using namespace std;
 
 SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 {
+    GOAL_DEFAULT = 0;
+    GOAL_CIRCULAR = 1;
+    GOAL_ZIGZAG = 2;
+
 	areParticlesVisible = false;
 	m_numParticles = numBirds + numPredators;
     m_numBirds = numBirds;
     m_numPredators = numPredators;
 
     // push the goal's pos and vel first before any birds
+    goalPatternId = 0;
     m_goalPos = Vector3f(0,0,0);
     m_goalVel = Vector3f(0,0,0);
     m_vVecState.push_back(m_goalPos);
@@ -39,7 +44,7 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 	minSeparation = 1.0f;
 	neighborCutoff = 3.0f;
     maxVelocityBird = 1.2f;
-    maxVelocityPredator = 1.5f * maxVelocityBird;
+    maxVelocityPredator = 0.8f * maxVelocityBird;
     predatorSeparation = 2.5f;
 	cout << "Init: articles should have minimum Separation: " << minSeparation << endl;
 	MAX_BUFFER_SIZE = 100;
@@ -170,9 +175,7 @@ Vector3f SimpleSystem::perceivedCenter(Vector3f centerOfMass, Vector3f position)
 
 void SimpleSystem::step() { 
     time_step++; 
-    // Vector3f circular = Vector3f(cos(time_step/90.0f), sin(time_step/90.0f), 0);
-    m_goalPos = m_vVecState[0];
-    m_goalVel = m_vVecState[1];
+    updateGoal(time_step);
 }
 
 // render the system (ie draw the particles/birds)
@@ -300,4 +303,35 @@ float SimpleSystem::rad_to_deg(float rad)
 void SimpleSystem::shiftRoot(Vector3f delta) {
     m_goalVel+=delta;
     m_vVecState[1] = m_goalVel;
+}
+
+void SimpleSystem::setGoalPattern(int patternId) {
+    goalPatternId = patternId;
+    switch(patternId) {
+        case 1:
+            break;
+        default:
+            break;
+    }
+}
+
+void SimpleSystem::updateGoal(int time_step) {
+    m_goalPos = m_vVecState[0];
+    m_goalVel = m_vVecState[1];
+
+    switch (goalPatternId) {
+        case 1: // Circular
+        {
+            Vector3f circular = Vector3f(2*cos(time_step/30.0f), 1.5*sin(time_step/30.0f), 0);
+            m_goalPos = circular;
+            m_vVecState[0] = m_goalPos;
+            m_vVecState[1] = Vector3f::ZERO;
+            break;
+        }
+        case 2: // Zig-zag
+            break;
+        case 0: // Static (user-input)
+        default:
+            break;
+    }
 }

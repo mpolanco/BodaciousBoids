@@ -20,6 +20,10 @@ public:
 
 	SimpleSystem(int numBirds, int numPredators);
 	
+    int GOAL_DEFAULT ;
+    int GOAL_CIRCULAR;
+    int GOAL_ZIGZAG;
+
 	vector<Vector3f> evalF(vector<Vector3f> state);
 	
 	void draw();
@@ -27,8 +31,11 @@ public:
     Vector3f centerOfMass(vector<Vector3f> positions);
     void shiftRoot(Vector3f delta);
     void step();
+    void setGoalPattern(int patternId);
 
 protected:
+    void updateGoal(int time_step);
+
     /* BIRD VARIABLES AND METHODS */
     int birdStartIndex; // the first index of birds in the state vector
     int m_numBirds;
@@ -39,6 +46,7 @@ protected:
 
     Vector3f m_goalPos;
     Vector3f m_goalVel;
+    int goalPatternId;
 
     Vector3f perceivedCenter(Vector3f centerOfMass, Vector3f position);
 
@@ -51,7 +59,7 @@ protected:
     /* PREDATOR VARIABLES AND METHODS */
     int predatorStartIndex; // the first index of predators in the state vector
     int m_numPredators;
-    
+
     float predatorSeparation;
     float maxVelocityPredator;
 

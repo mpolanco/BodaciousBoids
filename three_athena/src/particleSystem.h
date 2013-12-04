@@ -13,7 +13,6 @@ public:
 
 	ParticleSystem(int numParticles=0 );
 
-
 	int m_numParticles;
 	bool areSpringsVisible;
 	bool areParticlesVisible;

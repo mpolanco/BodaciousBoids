@@ -140,8 +140,8 @@ namespace
             // system = new ClothSystem();
             break;
         case 's':
-            cout << "Toggling spring visibility" << endl;
-            system->toggleSprings();
+            cout << "Setting circular goal" << endl;
+            system->setGoalPattern(system->GOAL_CIRCULAR);
             break;
         case 'e':
            break;
