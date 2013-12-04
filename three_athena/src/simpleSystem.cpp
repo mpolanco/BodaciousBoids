@@ -207,9 +207,14 @@ Vector3f SimpleSystem::perceivedCenter(Vector3f centerOfMass, Vector3f position)
 	return centerOfMass;
 }
 
-Vector3f SimpleSystem::getRandomPosition()
+int SimpleSystem::getRandomBirdPositionIndex()
 {
-    return getState()[0];
+    return (int)(rand() % m_numParticles + 1) * 2;
+}
+
+Vector3f SimpleSystem::getPositionAtIndex(int ind)
+{
+    return getState()[ind];
 }
 
 void SimpleSystem::step() { 

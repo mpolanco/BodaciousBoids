@@ -26,7 +26,8 @@ public:
 
 	vector<Vector3f> evalF(vector<Vector3f> state);
 
-    Vector3f getRandomPosition();
+    Vector3f getPositionAtIndex(int ind);
+    int getRandomBirdPositionIndex();
 	
 	void draw();
 
