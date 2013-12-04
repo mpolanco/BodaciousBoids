@@ -14,7 +14,8 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
     xDim = 4;
     yDim = 4;
     zDim = 4;
-    box_size = 4;
+    reboundFactor = 2.0f;
+    reboundZone = 0.1f;
     cout << "Bounding box X, Y, Z: " << xDim << ", " << yDim << ", " << zDim << endl;
 
 	areParticlesVisible = false;
@@ -150,7 +151,6 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
             }
         }
 
-
 		// Cohesion
 		Vector3f perceived_center = perceivedCenter(flockCenter, pos_i);
 		cohesiveForce = (perceived_center - pos_i);
@@ -159,7 +159,9 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 		forces+= alignForce * alignWeight * scatter;
 		forces+= cohesiveForce * cohesiveWeight * scatter;
         forces+= goalForce * goalWeight * scatter;
-        forces+= evadeForce;	
+        forces+= evadeForce;
+        forces+= boundPosition(pos_i); // Stay in Bounds
+        
 
         // Limit the velocity of the birds
         Vector3f vel_new = vel_i + forces;
@@ -197,6 +199,8 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
                 forces+= (diff.normalized() / dist);
             }
         }
+
+        forces+= boundPosition(pos_pred); // Stay in Bounds
 
         // set velocity and aceleration vectors
         Vector3f vel_new = vel_pred + forces;
@@ -460,4 +464,32 @@ Vector3f SimpleSystem::limitPredatorVelocity(Vector3f vel) {
         vel*= maxVelocityPredator;
     }
     return vel;
+}
+
+Vector3f SimpleSystem::boundPosition(Vector3f position) {
+    float xDist = 0;
+    float yDist = 0;
+    float zDist = 0;
+
+    float distFromEdge = abs(position.x()) - xDim;
+    if (distFromEdge > -reboundZone) {
+        int sign = (position.x() > 0) ? -1 : 1; // sign of repelling force
+        xDist = (distFromEdge + reboundZone) * sign;
+
+    }
+
+    distFromEdge = abs(position.y()) - yDim;
+    if (distFromEdge > -reboundZone) {
+        int sign = (position.y() > 0) ? -1 : 1; // sign of repelling force
+        yDist = (distFromEdge + reboundZone) * sign;
+
+    }
+
+    distFromEdge = abs(position.z()) - zDim;
+    if (distFromEdge > -reboundZone) {
+        int sign = (position.z() > 0) ? -1 : 1; // sign of repelling force
+        zDist = (distFromEdge + reboundZone) * sign;
+
+    }
+    return Vector3f(xDist, yDist, zDist) * reboundFactor; // bounding force
 }

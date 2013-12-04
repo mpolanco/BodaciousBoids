@@ -27,9 +27,8 @@ public:
     int xDim;
     int yDim;
     int zDim;
-
-    int box_size;
-
+    float reboundFactor;
+    float reboundZone;
 
 	vector<Vector3f> evalF(vector<Vector3f> state);
 
@@ -99,7 +98,7 @@ protected:
     /* OTHER METHODS */
         void drawObstacles();
         void drawBoundingVertices();
-
+        Vector3f boundPosition(Vector3f position);
 };
 
 #endif
