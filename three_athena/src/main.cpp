@@ -36,6 +36,7 @@ namespace
     // float STEP_SIZE = 0.008f; //Works for Trapzoidal
     bool FOLLOW_MODE = false;
     bool FIRST_PERSON = false;
+    int BIRD_POSITION_INDEX = 0;
     int numInitialBirds = 10;
     int numInitialPredators = 2;
 
@@ -167,10 +168,21 @@ namespace
         case 'b':
             cout << "Triggering follow mode"<< endl;
             FOLLOW_MODE = !FOLLOW_MODE;
+            if (FOLLOW_MODE)
+            {
+                BIRD_POSITION_INDEX = system->getRandomBirdPositionIndex();
+            }
+            else
+            {
+                BIRD_POSITION_INDEX = 0;
+            }
             break;
         case 'v':
-            cout << "Toggling perspective" << endl;
-            FIRST_PERSON = !FIRST_PERSON;
+            cout << "Toggling following bird" << endl;
+            if (FOLLOW_MODE)
+            {
+                BIRD_POSITION_INDEX = system->getRandomBirdPositionIndex();
+            }
             break;
         default:
             cout << "Unhandled key press " << key << "." << endl;        
@@ -287,7 +299,7 @@ namespace
         //Code to follow a bird
         if (FOLLOW_MODE)
         {
-            camera.SetCenter(system->getRandomPosition());
+            camera.SetCenter(system->getPositionAtIndex(BIRD_POSITION_INDEX));
         }
         /*if (FIRST_PERSON)
         {
