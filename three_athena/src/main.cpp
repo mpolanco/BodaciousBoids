@@ -55,11 +55,10 @@ namespace
     cout << "Step size is: " << STEP_SIZE << "\n" << endl;
     cout << "*****************************************************************************************************" << endl;
     cout << "* To move the cloth and pendulum systems, press and hold the arrow keys                             *" << endl;
-    cout << "* To toggle particles, press p                                                                      *" << endl;
-    cout << "* To toggle springs, press s                                                                        *" << endl;
-    cout << "* To create or restart the SimpleSystem, press 1                                                    *" << endl;
-    cout << "* To create or restart the PendulumSystem, press 2                                                  *" << endl;
-    cout << "* To create or restart the ClothSystem, press 3                                                     *" << endl;
+    cout << "* To toggle particles/birds, press p                                                                *" << endl;
+    cout << "* To set a circular goal, press s                                                                   *" << endl;
+    cout << "* To return the goal to default (user-controlled), press d                                          *" << endl;
+    cout << "* To create or restart the FlockSystem, press 1                                                     *" << endl;
     cout << "* To toggle wind, press w                                                                           *" << endl;
     cout << "* To exit press Escape                                                                              *" << endl;
     cout << "*****************************************************************************************************" << endl;
