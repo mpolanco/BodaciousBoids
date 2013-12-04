@@ -41,6 +41,11 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
         m_vVecState.push_back(vel);
     }
 
+    cohesiveWeight = 1 / 4.0f;
+    alignWeight = (1.0/8.0f);
+    separationWeight = 1.0f;
+    goalWeight = 1.0f;
+
 	minSeparation = 1.0f;
 	neighborCutoff = 3.0f;
     maxVelocityBird = 1.2f;
@@ -65,8 +70,7 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
     f.push_back(goalVel);
     f.push_back(evalViscousDrag(goalVel));
 
-	// for each particle in the state
-	// evaluate actual forces, except anchor the first particle
+	// EVALUATE BIRDS
 	for(int i=birdStartIndex; i < predatorStartIndex; i+=2) {
 		// get the particles position and velocity
 		Vector3f pos_i = state[i];
@@ -84,6 +88,8 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 		Vector3f cohesiveForce = Vector3f::ZERO;
         // Goal
         Vector3f goalForce = (goalPos - pos_i);
+        // Evade
+        Vector3f evadeForce = Vector3f::ZERO;
 
         // For each other bird, determine separation and alignment forces
 		for(int j=birdStartIndex; j < predatorStartIndex; j+=2) {
@@ -119,37 +125,65 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 		if (numNearby > 0) { // avoid dividing by zero
 			alignForce*= (1/numNearby); //average the align force
 			alignForce-= vel_i; // Implement Reynolds: Change = Desired - Current
-			alignForce*= (1.0/8.0f);
 		}
+
+        // Evade
+        float scatter = 1.0f;
+        for(int p=predatorStartIndex; p < state.size(); p+=2) {
+            Vector3f predator_pos = state[p];
+            Vector3f diff = pos_i - predator_pos;
+            float dist = diff.abs();
+            if ( dist < neighborCutoff ) {
+                // cout << "Bird " << i/2 << " needs to scatter!!!" << endl;
+                // scatter = -1.0 * 2.0/dist;
+                scatter = 0.5;
+                evadeForce+= (2*diff.normalized()/dist);
+                // cout << "Distance from predator:  " << dist << " Evade force magnitude: " << evadeForce.abs() << ":: ";
+                // evadeForce.print();
+                // cout << endl;
+            }
+        }
+
 
 		// Cohesion
 		Vector3f perceived_center = perceivedCenter(flockCenter, pos_i);
-		cohesiveForce = (perceived_center - pos_i)/4; // weight the force so it's not overpowering
+		cohesiveForce = (perceived_center - pos_i);
 		
-		forces+= sepForce;
-		forces+= alignForce;
-		forces+= cohesiveForce;
-        forces+= goalForce;	
+		forces+= sepForce * separationWeight;
+		forces+= alignForce * alignWeight * scatter;
+		forces+= cohesiveForce * cohesiveWeight * scatter;
+        forces+= goalForce * goalWeight * scatter;
+        forces+= evadeForce;	
 
         // Limit the velocity of the birds
         Vector3f vel_new = vel_i + forces;
-        if (vel_new.abs() > maxVelocityBird) {
-            vel_new.normalize();
-            vel_new*= maxVelocityBird;
-        }
+        vel_new = limitBirdVelocity(vel_new);
 		forces.normalize();
+        forces+= evalViscousDrag(vel_new);
 
-		f.push_back(vel_i+forces);
-        forces+= evalViscousDrag(vel_i+forces);
+		f.push_back(vel_new);        
 		f.push_back(forces);
 	}
 
+    // EVALUATE PREDATORS
     for(int p=predatorStartIndex; p < state.size(); p+=2) {
         // get the particles position and velocity
         Vector3f pos_pred = state[p];
         Vector3f vel_pred = state[p+1];
-        f.push_back(vel_pred);
-        f.push_back(Vector3f::ZERO);
+
+        // find the closest prey
+        int birdIndex = findClosestPrey(state, pos_pred);
+
+        Vector3f forces = (state[birdIndex] - pos_pred);
+
+        // set velocity and aceleration vectors
+        Vector3f vel_new = vel_pred + forces;
+        vel_new = limitBirdVelocity(vel_new);
+        forces.normalize();
+        forces+= evalViscousDrag(vel_new);
+
+        f.push_back(vel_new);
+        f.push_back(forces);
     }
 
 	return f;
@@ -327,4 +361,35 @@ void SimpleSystem::updateGoal(int time_step) {
     }
     m_goalPos = m_vVecState[0];
     m_goalVel = m_vVecState[1];
+}
+
+int SimpleSystem::findClosestPrey(vector<Vector3f> state, Vector3f predator_pos) {
+    float smallestDistanceToPrey = 10000;
+    int indexOfPrey = birdStartIndex;
+
+    for(int i=birdStartIndex; i < predatorStartIndex; i+=2) {
+        Vector3f pos_prey = state[i]; 
+        float dist = (predator_pos - pos_prey).abs();
+        if ( dist < smallestDistanceToPrey ) {
+            smallestDistanceToPrey = dist;
+            indexOfPrey = i;
+        }
+    }
+    return indexOfPrey;
+}
+
+Vector3f SimpleSystem::limitBirdVelocity(Vector3f vel) {
+    if (vel.abs() > maxVelocityBird) {
+        vel.normalize();
+        vel*= maxVelocityBird;
+    }
+    return vel;
+}
+
+Vector3f SimpleSystem::limitPredatorVelocity(Vector3f vel) {
+    if (vel.abs() > maxVelocityPredator) {
+        vel.normalize();
+        vel*= maxVelocityPredator;
+    }
+    return vel;
 }

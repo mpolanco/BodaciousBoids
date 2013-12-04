@@ -44,12 +44,17 @@ protected:
     float neighborCutoff;
     float maxVelocityBird;
 
+    float cohesiveWeight;
+    float alignWeight;
+    float separationWeight;
+    float goalWeight;
+
     Vector3f m_goalPos;
     Vector3f m_goalVel;
     int goalPatternId;
 
     Vector3f perceivedCenter(Vector3f centerOfMass, Vector3f position);
-
+    Vector3f limitBirdVelocity(Vector3f vel);
     // Returns a random float between 0 and 1
     float randf() { return ((float) rand()) / (float) RAND_MAX ;}
 
@@ -62,6 +67,9 @@ protected:
 
     float predatorSeparation;
     float maxVelocityPredator;
+
+    int findClosestPrey(vector<Vector3f> state, Vector3f predator_pos);
+    Vector3f limitPredatorVelocity(Vector3f vel);
 
     /* 
         DOVE METHODS AND VARIABLES 
