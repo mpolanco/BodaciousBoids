@@ -35,7 +35,7 @@ namespace
     float STEP_SIZE = 0.04f; //Works for RK4
     // float STEP_SIZE = 0.008f; //Works for Trapzoidal
     int numInitialBirds = 10;
-    int numInitialPredators = 1;
+    int numInitialPredators = 2;
 
   // initialize your particle systems
   ///TODO: read argv here. set timestepper , step size etc
