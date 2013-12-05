@@ -24,6 +24,8 @@ public:
     int GOAL_CIRCULAR;
     int GOAL_ZIGZAG;
 
+    bool showFeathers;
+
     Vector3f boxDims;
     float reboundFactor;
     float reboundZone;
@@ -39,6 +41,10 @@ public:
     void shiftRoot(Vector3f delta);
     void step();
     void setGoalPattern(int patternId);
+
+    void toggleShowFeathers() {
+        showFeathers = !showFeathers;
+    }
 
 protected:
     void updateGoal(int time_step);
@@ -187,7 +193,10 @@ protected:
         }
 
         Vector3f getBirdColor(int bird_index) {
-           return getFeatherColor(bird_index); 
+            if (showFeathers){ 
+                return getFeatherColor(bird_index); 
+            }
+            return getPersonalityColor(bird_index);
         }
 
 };
