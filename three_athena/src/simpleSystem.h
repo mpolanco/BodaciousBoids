@@ -101,7 +101,7 @@ protected:
 
         void drawObstacles();
         float randomObstacleSize();
-        Vector3f avoidObstacles(Vector3f position);
+        Vector3f avoidObstacles(Vector3f position, float daringness);
 
     /* 
         BOUNDING BOX METHODS AND VARIABLES 
