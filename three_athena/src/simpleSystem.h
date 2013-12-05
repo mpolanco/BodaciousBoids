@@ -54,7 +54,7 @@ protected:
 
     /* Bird Personality Traits: Orthogonal Basis
         daring: less emphasis on avoiding predators and obstacles
-        social: smaller separation, more cohesion, larger neighborhood
+        social: smaller separation, more cohesion
         speedy: faster max speed
     */ 
     vector<float> daringness; // R
