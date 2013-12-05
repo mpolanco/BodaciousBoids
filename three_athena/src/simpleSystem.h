@@ -49,6 +49,9 @@ protected:
     int birdStartIndex; // the first index of birds in the state vector
     int m_numBirds;
 
+    vector<Vector3f> doveColors;
+    vector<Vector3f> eagleColors;
+
     /* Bird Personality Traits: Orthogonal Basis
         daring: less emphasis on avoiding predators and obstacles
         social: smaller separation, more cohesion, larger neighborhood
@@ -57,6 +60,7 @@ protected:
     vector<float> daringness; // R
     vector<float> sociableness;  // B
     vector<float> speediness; // G
+    vector<int> colorIndex;
 
     float minSeparation;
     float neighborCutoff;
@@ -83,14 +87,14 @@ protected:
     /* 
         PREDATOR VARIABLES AND METHODS 
     */
-    int predatorStartIndex; // the first index of predators in the state vector
-    int m_numPredators;
+        int predatorStartIndex; // the first index of predators in the state vector
+        int m_numPredators;
 
-    float predatorSeparation;
-    float maxVelocityPredator;
+        float predatorSeparation;
+        float maxVelocityPredator;
 
-    int findClosestPrey(vector<Vector3f> state, Vector3f predator_pos);
-    Vector3f limitPredatorVelocity(Vector3f vel, float speediness);
+        int findClosestPrey(vector<Vector3f> state, Vector3f predator_pos);
+        Vector3f limitPredatorVelocity(Vector3f vel, float speediness);
 
     /* 
         OBSTACLE METHODS AND VARIABLES 
@@ -101,7 +105,7 @@ protected:
 
         void drawObstacles();
         float randomObstacleSize();
-        Vector3f avoidObstacles(Vector3f position);
+        Vector3f avoidObstacles(Vector3f position, float daringness);
 
     /* 
         BOUNDING BOX METHODS AND VARIABLES 
@@ -132,7 +136,60 @@ protected:
         float getDaringness(int bird_index);
 
         float getSociableness(int bird_index);
+
+        void populateDoveColors() {
+            // doveColors.push_back(Vector3f(0.98, 0.98, 0.82)); // lemon chiffon
+            // doveColors.push_back(Vector3f(1.0, .97, .86)); // corn silk
+            // doveColors.push_back(Vector3f(.96, .87, 0.7 )); // wheat
+            // doveColors.push_back(Vector3f(.98, .92, .84)); // antique white
+            doveColors.push_back(Vector3f(1, .89, .71)); // moccasin
+            // doveColors.push_back(Vector3f(1, .89, .88));
+            // doveColors.push_back(Vector3f(.96, 1, .98));
+
+            doveColors.push_back(Vector3f(1, 0.75, 0.79)); // pink
+            doveColors.push_back(Vector3f(.87, 0.72, 0.53)); // burly wood
+            doveColors.push_back(Vector3f(.96, 0.64, 0.38)); // sandy brown
+            doveColors.push_back(Vector3f(1.0, 0.5, 0.31)); // coral
+
+        }
+
+        void populateEagleColors() {
+            eagleColors.push_back(Vector3f(0.545, 0.27, 0.074)); // saddle brown
+            eagleColors.push_back(Vector3f(0.63, .32, .18)); // sienna
+        }
+
+        int getRandomDoveColorIndex() {
+            return (int) (randf() * doveColors.size());
+        }
+
+        int getRandomDoveColorIndex(int i) {
+            return i % doveColors.size();
+        }
         
+        int getRandomEagleColorIndex() {
+            return (int) (randf() * eagleColors.size());
+        }
+
+        Vector3f getFeatherColor(int bird_index) {
+            int ind = (bird_index - birdStartIndex) / 2;
+            int colInd = colorIndex[ind];
+            if (ind >= m_numBirds) {
+                return eagleColors[colInd];
+            }
+            return doveColors[colInd];
+        }
+
+        Vector3f getPersonalityColor(int bird_index) {
+            float dar = getDaringness(bird_index);
+            float soc = getSociableness(bird_index);
+            float spd = getSpeediness(bird_index);
+            return Vector3f(dar, 0.3 + 0.3*spd, soc);
+        }
+
+        Vector3f getBirdColor(int bird_index) {
+           return getFeatherColor(bird_index); 
+        }
+
 };
 
 #endif

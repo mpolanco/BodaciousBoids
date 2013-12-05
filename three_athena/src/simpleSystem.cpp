@@ -21,6 +21,9 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
     m_numBirds = numBirds;
     m_numPredators = numPredators;
 
+    populateDoveColors();
+    populateEagleColors();
+
     // push the goal's pos and vel first before any birds
     goalPatternId = 0;
     m_goalPos = Vector3f(0,0,0);
@@ -35,9 +38,10 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 
 		m_vVecState.push_back(pos);
 		m_vVecState.push_back(vel);
-        daringness.push_back(randf_sym());
-        sociableness.push_back(randf_sym());
+        daringness.push_back(randf());
+        sociableness.push_back(randf());
         speediness.push_back(randf_sym());
+        colorIndex.push_back(getRandomDoveColorIndex(i));
 	}
 
     predatorStartIndex = m_vVecState.size();
@@ -47,9 +51,10 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 
         m_vVecState.push_back(pos);
         m_vVecState.push_back(vel);
-        daringness.push_back(randf_sym());
-        sociableness.push_back(randf_sym());
+        daringness.push_back(randf());
+        sociableness.push_back(randf());
         speediness.push_back(randf_sym());
+        colorIndex.push_back(getRandomEagleColorIndex());
     }
 
     cohesiveWeight = 1 / 4.0f;
@@ -74,13 +79,13 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
     int num_sphere_obstacles = 10;
     for (int i=0; i<num_sphere_obstacles; i++) {
         sphereObstacleRadius.push_back(randomObstacleSize());
-        if (i==0) {
+        // if (i==0) {
             Vector3f posInXYPlane = randomPositionInBox();
             posInXYPlane[2] = 0;
             sphereObstacles.push_back(posInXYPlane);
-            continue;
-        }
-        sphereObstacles.push_back(randomPositionInBox());
+            // continue;
+        // }
+        // sphereObstacles.push_back(randomPositionInBox());
         
     }
    
@@ -158,14 +163,15 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 		}
 
         // Evade
+        float daring = getDaringness(i);
         float scatter = 1.0f;
         for(int p=predatorStartIndex; p < state.size(); p+=2) {
             Vector3f predator_pos = state[p];
             Vector3f diff = pos_i - predator_pos;
             float dist = diff.abs();
-            if ( dist < neighborCutoff ) {
+            if ( dist < neighborCutoff*(daring+0.1) ) {
                 scatter = 0.5;
-                evadeForce+= (2*diff.normalized()/dist);
+                evadeForce+= (2*diff.normalized()/dist)*(daring+0.1);
             }
         }
 
@@ -179,7 +185,7 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
         forces+= goalForce * goalWeight * scatter;
         forces+= evadeForce;
         forces+= boundPosition(pos_i); // Stay in Bounds
-        forces+= avoidObstacles(pos_i); 
+        forces+= avoidObstacles(pos_i, daring); 
         
 
         // Limit the velocity of the birds
@@ -220,7 +226,7 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
         }
 
         forces+= boundPosition(pos_pred); // Stay in Bounds
-        forces+= avoidObstacles(pos_pred);
+        forces+= avoidObstacles(pos_pred, getDaringness(p));
 
         // set velocity and aceleration vectors
         Vector3f vel_new = vel_pred + forces;
@@ -294,7 +300,8 @@ void SimpleSystem::draw()
 		glPushMatrix();
 		glTranslatef(pos[0], pos[1], pos[2] );
 		glEnable(GL_COLOR_MATERIAL);
-		glColor3f(.2 + 0.2*getSpeediness(i), .2, (i/2)*1.0/m_numBirds);
+        Vector3f color = getBirdColor(i);
+        glColor3f(color.x(), color.y(), color.z());
 		glDisable(GL_COLOR_MATERIAL);
 
 		if (areParticlesVisible) { // display birds
@@ -332,7 +339,8 @@ void SimpleSystem::draw()
         glPushMatrix();
         glTranslatef(predator_pos[0], predator_pos[1], predator_pos[2] );
         glEnable(GL_COLOR_MATERIAL);
-        glColor3f(0.54, 0.27, 0.074);
+        Vector3f color = getBirdColor(j);
+        glColor3f(color.x(), color.y(), color.z());
         glDisable(GL_COLOR_MATERIAL);
         if (areParticlesVisible) { // display birds
             Vector3f vel = m_vVecState[j+1].normalized(); // PARTICLE VELOCITY
@@ -397,7 +405,7 @@ void SimpleSystem::drawObstacles() {
         glEnable(GL_COLOR_MATERIAL);
         glColor3f(1, 0.8549, 0.725);
         glDisable(GL_COLOR_MATERIAL);
-        glutSolidSphere(sphere_radius,10.0f,10.0f);
+        glutSolidSphere(sphere_radius, 15.0f, 15.0f);
         glPopMatrix();
     }
 }
@@ -560,15 +568,17 @@ float SimpleSystem::randomObstacleSize() {
     return baseSize + randDiff;
 }
 
-Vector3f SimpleSystem::avoidObstacles(Vector3f position) {
+Vector3f SimpleSystem::avoidObstacles(Vector3f position, float daringness) {
     Vector3f avoidForce = Vector3f::ZERO;
+    float bird_specific_rebound_zone = obstacleReboundZone * (1.1 - daringness);
+
     for(int i=0; i < sphereObstacles.size(); i++) {
         Vector3f pos_obs = sphereObstacles[i];
         float obs_rad = sphereObstacleRadius[i];
         Vector3f diff = position - pos_obs;
         float dist = diff.abs();
-        if (dist < obs_rad + obstacleReboundZone) {
-            avoidForce+= diff.normalized() / dist;
+        if (dist < obs_rad + bird_specific_rebound_zone) {
+            avoidForce+= (diff.normalized() / dist ) * (1.1 - daringness);
         }
     }
     return avoidForce;
