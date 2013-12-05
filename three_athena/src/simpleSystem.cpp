@@ -55,6 +55,7 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 	neighborCutoff = 3.0f;
     maxVelocityBird = 1.2f;
     maxVelocityPredator = 0.8f * maxVelocityBird;
+
     predatorSeparation = 2.5f;
 	cout << "Init: articles should have minimum Separation: " << minSeparation << endl;
 	MAX_BUFFER_SIZE = 100;
@@ -62,10 +63,17 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 
     /* Initialize Random obstacles */
     obstacleReboundZone = 0.1;
-    int num_sphere_obstacles = 5;
+    int num_sphere_obstacles = 10;
     for (int i=0; i<num_sphere_obstacles; i++) {
-        sphereObstacles.push_back(randomPositionInBox());
         sphereObstacleRadius.push_back(randomObstacleSize());
+        if (i==0) {
+            Vector3f posInXYPlane = randomPositionInBox();
+            posInXYPlane[2] = 0;
+            sphereObstacles.push_back(posInXYPlane);
+            continue;
+        }
+        sphereObstacles.push_back(randomPositionInBox());
+        
     }
    
 }
@@ -148,13 +156,8 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
             Vector3f diff = pos_i - predator_pos;
             float dist = diff.abs();
             if ( dist < neighborCutoff ) {
-                // cout << "Bird " << i/2 << " needs to scatter!!!" << endl;
-                // scatter = -1.0 * 2.0/dist;
                 scatter = 0.5;
                 evadeForce+= (2*diff.normalized()/dist);
-                // cout << "Distance from predator:  " << dist << " Evade force magnitude: " << evadeForce.abs() << ":: ";
-                // evadeForce.print();
-                // cout << endl;
             }
         }
 
@@ -516,7 +519,7 @@ Vector3f SimpleSystem::randomPositionInBox() {
 
 float SimpleSystem::randomObstacleSize() {
     float baseSize = 0.1f;
-    float randDiff = randf_sym() * 0.05;
+    float randDiff = randf() * 0.5;
     return baseSize + randDiff;
 }
 
