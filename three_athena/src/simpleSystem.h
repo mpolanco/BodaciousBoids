@@ -149,6 +149,7 @@ protected:
             doveColors.push_back(Vector3f(1, 0.75, 0.79)); // pink
             doveColors.push_back(Vector3f(.87, 0.72, 0.53)); // burly wood
             doveColors.push_back(Vector3f(.96, 0.64, 0.38)); // sandy brown
+            doveColors.push_back(Vector3f(1.0, 0.5, 0.31)); // coral
 
         }
 
