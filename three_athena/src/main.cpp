@@ -120,11 +120,11 @@ namespace
         glDepthFunc(GL_LEQUAL);
         glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
         return 1;
-    }*/
+    }
 
     void display()
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity();
         glTranslatef(0.0f,0.0f,-5.0f);
         glRotatef(xRot,1.0f,0.0f,0.0f);
@@ -212,12 +212,6 @@ namespace
         // Top Left Of The Texture and Quad 
         glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f); 
         glEnd(); 
-
-        /*xRot += 0.3f;
-        yRot += 0.4f;
-        zRot += 0.5f;*/
-
-        glutSwapBuffers();
     }
 
     void reshape(int w,int h)
@@ -231,7 +225,7 @@ namespace
         gluPerspective(60.0f,(GLfloat)w / (GLfloat)h,1,100);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-    }
+    }*/
 
 
 
@@ -241,7 +235,7 @@ namespace
     // Base material colors (they don't change)
     GLfloat particleColor[] = {0.4f, 0.7f, 1.0f, 1.0f};
     GLfloat floorColor[] = {0.0f, 1.0f, 0.0f, 1.0f};
-    GLfloat skyColor[] = {0.3f, 0.3f, 1.0f, 1.0f};
+    GLfloat skyColor[] = {126/255.0, 192/255.0, 238/255.0, 1.0f};
     
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, particleColor);
     
@@ -253,7 +247,7 @@ namespace
     //background
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
     glPushMatrix();
-    glTranslatef(0.0f,-5.0f,0.0f);
+    glTranslatef(0.0f,-7.0f,0.0f);
     glScaled(50.0f,0.01f,50.0f);
     glutSolidCube(1);
     glPopMatrix();
@@ -359,9 +353,7 @@ namespace
             break;
         case 't':
             break;
-        case 'f':
-            cout << "Toggling feathers/personality colors" << endl;
-            system->toggleShowFeathers();
+        case 'i':
             break;
         case 'p':
             cout << "Toggling particles rendering" << endl;
@@ -522,6 +514,10 @@ namespace
         if (FOLLOW_MODE)
         {
             camera.SetCenter(system->getPositionAtIndex(BIRD_POSITION_INDEX));
+        }
+        if (FIRST_PERSON && FOLLOW_MODE)
+        {
+            camera.SetRotation(system->getRotationMatrixForBird(BIRD_POSITION_INDEX));
         }
 
         // Clear the rendering window

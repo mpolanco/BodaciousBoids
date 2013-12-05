@@ -34,6 +34,7 @@ public:
 
     Vector3f getPositionAtIndex(int ind);
     int getRandomBirdPositionIndex();
+    Matrix4f getRotationMatrixForBird(int index);
 	
 	void draw();
 
@@ -123,17 +124,21 @@ protected:
     /* 
         DOVE METHODS AND VARIABLES 
     */
-        void loadDove();
-        void drawDove();
+        void loadDove(int frame);
+        void drawDove(int frame);
+        void loadDoves(int numFrames);
+        
 
         // Globals for loading dove
         int MAX_BUFFER_SIZE;
         // This is the list of points (3D vectors)
-        vector<Vector3f> vecv;
+        vector<vector<Vector3f> > vecv_vector;
         // This is the list of normals (also 3D vectors)
-        vector<Vector3f> vecn;
+        vector<vector<Vector3f> > vecn_vector;
         // This is the list of faces (indices into vecv and vecn)
-        vector<vector<unsigned> > vecf;
+        vector<vector<vector<unsigned> > > vecf_vector;
+
+        std::vector<int> birdFrames;
 
     /* OTHER THINGS AND METHODS */
         float speedVariation;

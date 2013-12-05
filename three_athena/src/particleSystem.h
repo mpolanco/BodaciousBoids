@@ -29,6 +29,8 @@ public:
 
 	virtual Vector3f getPositionAtIndex(int ind) = 0;
 
+	virtual Matrix4f getRotationMatrixForBird(int index) = 0;
+
 	//toggles spring visibility
 	void toggleSprings(){ areSpringsVisible = !areSpringsVisible; };
 	void toggleParticles(){ areParticlesVisible = !areParticlesVisible; };	

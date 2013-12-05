@@ -1,4 +1,4 @@
-
+#include <string>
 #include "simpleSystem.h"
 
 using namespace std;
@@ -35,6 +35,8 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 
     birdStartIndex = 2;
 	for (int i=0; i < numBirds; i++) {
+    birdFrames.push_back(rand()%19);
+
 		Vector3f pos = Vector3f(i*0.4, randf(), randf());
 		Vector3f vel = Vector3f(0, randf(), 0);
 
@@ -48,6 +50,8 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 
     predatorStartIndex = m_vVecState.size();
     for (int j=0; j < numPredators; j++) {
+        birdFrames.push_back(rand()%19);
+
         Vector3f pos = Vector3f(-randf(), 1, 1);
         Vector3f vel = Vector3f(randf(), randf(), randf());
 
@@ -74,7 +78,7 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
     predatorSeparation = 2.5f;
 	cout << "Init: articles should have minimum Separation: " << minSeparation << endl;
 	MAX_BUFFER_SIZE = 100;
-	loadDove();
+	loadDoves(19);
 
     /* Initialize Random obstacles */
     obstacleReboundZone = 0.1;
@@ -272,6 +276,14 @@ Vector3f SimpleSystem::getPositionAtIndex(int ind)
     return getState()[ind];
 }
 
+Matrix4f SimpleSystem::getRotationMatrixForBird(int index)
+{
+  Vector3f vel = m_vVecState[index+1].normalized();
+  float angle = acos(Vector3f::dot(vel, Vector3f::FORWARD));
+  Vector3f axis = Vector3f::cross(vel, Vector3f::FORWARD).normalized();
+  return Matrix4f::rotation(axis, angle);
+}
+
 void SimpleSystem::step() { 
     time_step++; 
     updateGoal(time_step);
@@ -320,10 +332,12 @@ void SimpleSystem::draw()
 
             float angle = rad_to_deg (acos(Vector3f::dot(vel, Vector3f::FORWARD)));
             Vector3f axis = Vector3f::cross(vel, Vector3f::FORWARD).normalized();
+            glScalef(.25, .25, .25);
             glRotatef(angle, axis.x(),axis.y(),axis.z());
             
             //glRotatef(90, 0,0,1);
-		    drawDove();
+        int frame = birdFrames[(i - birdStartIndex)/2]++ % 19;
+		    drawDove(frame);
 		} // otherwise display spheres
 		else {
 			glutSolidSphere(0.075f,10.0f,10.0f);
@@ -347,15 +361,15 @@ void SimpleSystem::draw()
         if (areParticlesVisible) { // display birds
             Vector3f vel = m_vVecState[j+1].normalized(); // PARTICLE VELOCITY
 
-
-            glBegin(GL_LINES);
+            //debug direction vector
+            /*glBegin(GL_LINES);
             glVertex3f(0,0,0); glVertex(vel);
-            glEnd();
+            glEnd();*/
 
 
             float angle = rad_to_deg (acos(Vector3f::dot(vel, Vector3f::FORWARD)));
             Vector3f axis = Vector3f::cross(vel, Vector3f::FORWARD).normalized();
-            glScalef(1.5, 1.5, 1.5);
+            glScalef(.5, .5, .5);
             glRotatef(angle, axis.x(),axis.y(),axis.z());
             //float y_angle = rad_to_deg ( atan2(vel.x() , vel.z()) );
             //float x_angle = rad_to_deg ( atan2(-vel.y() , abs(vel.z())) );
@@ -365,7 +379,8 @@ void SimpleSystem::draw()
             //glRotatef(y_angle, 0.0, 1.0, 0);
             //glRotatef(z_angle, 0.0, 0.0, 1.0);
 
-            drawDove();
+            int frame = birdFrames[(j - birdStartIndex)/2]++ % 19;
+            drawDove(frame);
         } // otherwise display spheres
         else {
             glutSolidSphere(0.1f,10.0f,10.0f);
@@ -376,6 +391,8 @@ void SimpleSystem::draw()
     drawBoundingVertices();
     drawObstacles();
 }
+
+
 
 void SimpleSystem::drawBoundingVertices() {
     float xDim = boxDims.x();
@@ -413,8 +430,11 @@ void SimpleSystem::drawObstacles() {
 }
 
 
-inline void SimpleSystem::drawDove()
+inline void SimpleSystem::drawDove(int frame)
 {
+    vector<Vector3f> vecv = vecv_vector[frame];
+    vector<Vector3f> vecn = vecn_vector[frame];
+    vector<vector<unsigned> > vecf = vecf_vector[frame];
     //cout << "start" << endl;
     for( unsigned int i=0; i < vecf.size(); i++ )
     {
@@ -431,12 +451,24 @@ inline void SimpleSystem::drawDove()
     //cout<< "end" << endl;
 }
 
-void SimpleSystem::loadDove()
+void SimpleSystem::loadDove(int frame)
 {
-    std::ifstream infile("dove_simple_test.obj");
+    int number = frame;
+
+    std::ostringstream ostr; //output string stream
+    ostr << number; //use the string stream just like cout,
+    //except the stream prints not to stdout but to a string.
+
+    std::string theNumberString = ostr.str(); //the str() function of the stream 
+    //returns the string.
+
+    std::ifstream infile("BirdAnimation/BirdAnim" + theNumberString + ".obj");
     char buffer[2048];
-    vecn.clear();
-    vecf.clear();
+    vector<Vector3f> vecv;
+    // This is the list of normals (also 3D vectors)
+    vector<Vector3f> vecn;
+    // This is the list of faces (indices into vecv and vecn)
+    vector<vector<unsigned> > vecf;
 
     while( infile.getline(buffer, 2048) )
     {
@@ -473,6 +505,18 @@ void SimpleSystem::loadDove()
             vecf.push_back(vec);
         }
     }
+
+    vecv_vector.push_back(vecv);
+    vecn_vector.push_back(vecn);
+    vecf_vector.push_back(vecf);   
+}
+
+void SimpleSystem::loadDoves(int numFrames)
+{
+  for (int frame = 1; frame <= numFrames; ++frame)
+  {
+    loadDove(frame);
+  }
 }
 
 float SimpleSystem::rad_to_deg(float rad)
