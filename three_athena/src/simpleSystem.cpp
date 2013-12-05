@@ -35,6 +35,9 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 
 		m_vVecState.push_back(pos);
 		m_vVecState.push_back(vel);
+        daringness.push_back(randf_sym());
+        sociableness.push_back(randf_sym());
+        speediness.push_back(randf_sym());
 	}
 
     predatorStartIndex = m_vVecState.size();
@@ -44,6 +47,9 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 
         m_vVecState.push_back(pos);
         m_vVecState.push_back(vel);
+        daringness.push_back(randf_sym());
+        sociableness.push_back(randf_sym());
+        speediness.push_back(randf_sym());
     }
 
     cohesiveWeight = 1 / 4.0f;
@@ -53,8 +59,11 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 
 	minSeparation = 1.0f;
 	neighborCutoff = 3.0f;
+
     maxVelocityBird = 1.2f;
     maxVelocityPredator = 0.8f * maxVelocityBird;
+    speedVariation = 0.4;
+
     predatorSeparation = 2.5f;
 	cout << "Init: articles should have minimum Separation: " << minSeparation << endl;
 	MAX_BUFFER_SIZE = 100;
@@ -62,10 +71,17 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 
     /* Initialize Random obstacles */
     obstacleReboundZone = 0.1;
-    int num_sphere_obstacles = 5;
+    int num_sphere_obstacles = 10;
     for (int i=0; i<num_sphere_obstacles; i++) {
-        sphereObstacles.push_back(randomPositionInBox());
         sphereObstacleRadius.push_back(randomObstacleSize());
+        if (i==0) {
+            Vector3f posInXYPlane = randomPositionInBox();
+            posInXYPlane[2] = 0;
+            sphereObstacles.push_back(posInXYPlane);
+            continue;
+        }
+        sphereObstacles.push_back(randomPositionInBox());
+        
     }
    
 }
@@ -148,13 +164,8 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
             Vector3f diff = pos_i - predator_pos;
             float dist = diff.abs();
             if ( dist < neighborCutoff ) {
-                // cout << "Bird " << i/2 << " needs to scatter!!!" << endl;
-                // scatter = -1.0 * 2.0/dist;
                 scatter = 0.5;
                 evadeForce+= (2*diff.normalized()/dist);
-                // cout << "Distance from predator:  " << dist << " Evade force magnitude: " << evadeForce.abs() << ":: ";
-                // evadeForce.print();
-                // cout << endl;
             }
         }
 
@@ -173,7 +184,7 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 
         // Limit the velocity of the birds
         Vector3f vel_new = vel_i + forces;
-        vel_new = limitBirdVelocity(vel_new);
+        vel_new = limitBirdVelocity(vel_new, getSpeediness(i));
 		forces.normalize();
         forces+= evalViscousDrag(vel_new);
 
@@ -213,7 +224,7 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 
         // set velocity and aceleration vectors
         Vector3f vel_new = vel_pred + forces;
-        vel_new = limitBirdVelocity(vel_new);
+        vel_new = limitBirdVelocity(vel_new, getSpeediness(p));
         forces.normalize();
         forces+= evalViscousDrag(vel_new);
 
@@ -283,7 +294,7 @@ void SimpleSystem::draw()
 		glPushMatrix();
 		glTranslatef(pos[0], pos[1], pos[2] );
 		glEnable(GL_COLOR_MATERIAL);
-		glColor3f(.2, .2, (i/2)*1.0/m_numBirds);
+		glColor3f(.2 + 0.2*getSpeediness(i), .2, (i/2)*1.0/m_numBirds);
 		glDisable(GL_COLOR_MATERIAL);
 
 		if (areParticlesVisible) { // display birds
@@ -503,18 +514,18 @@ int SimpleSystem::findClosestPrey(vector<Vector3f> state, Vector3f predator_pos)
     return indexOfPrey;
 }
 
-Vector3f SimpleSystem::limitBirdVelocity(Vector3f vel) {
+Vector3f SimpleSystem::limitBirdVelocity(Vector3f vel, float speediness) {
     if (vel.abs() > maxVelocityBird) {
         vel.normalize();
-        vel*= maxVelocityBird;
+        vel*= (maxVelocityBird + (speediness * speedVariation));
     }
     return vel;
 }
 
-Vector3f SimpleSystem::limitPredatorVelocity(Vector3f vel) {
+Vector3f SimpleSystem::limitPredatorVelocity(Vector3f vel, float speediness) {
     if (vel.abs() > maxVelocityPredator) {
         vel.normalize();
-        vel*= maxVelocityPredator;
+        vel*= (maxVelocityPredator + (speediness * speedVariation));
     }
     return vel;
 }
@@ -545,7 +556,7 @@ Vector3f SimpleSystem::randomPositionInBox() {
 
 float SimpleSystem::randomObstacleSize() {
     float baseSize = 0.1f;
-    float randDiff = randf_sym() * 0.05;
+    float randDiff = randf() * 0.5;
     return baseSize + randDiff;
 }
 
@@ -561,4 +572,19 @@ Vector3f SimpleSystem::avoidObstacles(Vector3f position) {
         }
     }
     return avoidForce;
+}
+
+float SimpleSystem::getSpeediness(int bird_index) {
+    int ind = (bird_index - birdStartIndex) / 2;
+    return speediness[ind];
+}
+
+float SimpleSystem::getDaringness(int bird_index) {
+    int ind = (bird_index - birdStartIndex) / 2;
+    return daringness[ind];
+}
+
+float SimpleSystem::getSociableness(int bird_index) {
+    int ind = (bird_index - birdStartIndex) / 2;
+    return sociableness[ind];
 }

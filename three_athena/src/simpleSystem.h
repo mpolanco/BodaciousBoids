@@ -49,6 +49,15 @@ protected:
     int birdStartIndex; // the first index of birds in the state vector
     int m_numBirds;
 
+    /* Bird Personality Traits: Orthogonal Basis
+        daring: less emphasis on avoiding predators and obstacles
+        social: smaller separation, more cohesion, larger neighborhood
+        speedy: faster max speed
+    */ 
+    vector<float> daringness; // R
+    vector<float> sociableness;  // B
+    vector<float> speediness; // G
+
     float minSeparation;
     float neighborCutoff;
     float maxVelocityBird;
@@ -63,7 +72,7 @@ protected:
     int goalPatternId;
 
     Vector3f perceivedCenter(Vector3f centerOfMass, Vector3f position);
-    Vector3f limitBirdVelocity(Vector3f vel);
+    Vector3f limitBirdVelocity(Vector3f vel, float speediness);
     // Returns a random float between 0 and 1
     float randf() { return ((float) rand()) / (float) RAND_MAX ;}
     float randf_sym() { return (((float) rand() * 2) / (float) RAND_MAX) - 1; }
@@ -81,7 +90,7 @@ protected:
     float maxVelocityPredator;
 
     int findClosestPrey(vector<Vector3f> state, Vector3f predator_pos);
-    Vector3f limitPredatorVelocity(Vector3f vel);
+    Vector3f limitPredatorVelocity(Vector3f vel, float speediness);
 
     /* 
         OBSTACLE METHODS AND VARIABLES 
@@ -116,8 +125,13 @@ protected:
         // This is the list of faces (indices into vecv and vecn)
         vector<vector<unsigned> > vecf;
 
-    /* OTHER METHODS */
-        
+    /* OTHER THINGS AND METHODS */
+        float speedVariation;
+        float getSpeediness(int bird_index);
+
+        float getDaringness(int bird_index);
+
+        float getSociableness(int bird_index);
         
 };
 
