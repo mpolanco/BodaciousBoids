@@ -60,7 +60,7 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
     cohesiveWeight = 1 / 4.0f;
     alignWeight = (1.0/8.0f);
     separationWeight = 1.0f;
-    goalWeight = 1.0f;
+    goalWeight = 0.8f;
 
 	minSeparation = 1.0f;
 	neighborCutoff = 3.0f;
@@ -79,13 +79,13 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
     int num_sphere_obstacles = 10;
     for (int i=0; i<num_sphere_obstacles; i++) {
         sphereObstacleRadius.push_back(randomObstacleSize());
-        // if (i==0) {
+        if (i==0) {
             Vector3f posInXYPlane = randomPositionInBox();
             posInXYPlane[2] = 0;
             sphereObstacles.push_back(posInXYPlane);
-            // continue;
-        // }
-        // sphereObstacles.push_back(randomPositionInBox());
+            continue;
+        }
+        sphereObstacles.push_back(randomPositionInBox());
         
     }
    
@@ -96,7 +96,6 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 {
 	vector<Vector3f> f;
-	Vector3f flockCenter = centerOfMass(state);
 
     // load the goal's pos and vel in this state
     Vector3f goalPos = state[0];
@@ -121,10 +120,13 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 		float numNearby = 0;
 		// Cohesion 
 		Vector3f cohesiveForce = Vector3f::ZERO;
+        Vector3f centerOfNeighborMass = Vector3f::ZERO;
         // Goal
         Vector3f goalForce = (goalPos - pos_i);
         // Evade
         Vector3f evadeForce = Vector3f::ZERO;
+
+        float social = getSociableness(i);
 
         // For each other bird, determine separation and alignment forces
 		for(int j=birdStartIndex; j < predatorStartIndex; j+=2) {
@@ -138,13 +140,14 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 			// Separation
 			Vector3f diff = pos_i - pos_j;
 			float dist = diff.abs();
-			if ( dist < minSeparation ) {
+			if ( dist < minSeparation + (1-social) ) {
 				sepForce+= (diff.normalized() / dist) ;
 				numTooClose++;
 			}
 
-			// Alignment
+			// Cohesion and Alignment
 			if ( dist < neighborCutoff ) {
+                centerOfNeighborMass+= pos_j;
 				alignForce+= vel_j;
 				numNearby++;
 			}
@@ -156,10 +159,12 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
 			sepForce*= (1/numTooClose); // average the separation forces
 		}
 
-        // Alignment
+        // Alignment and Cohesion
 		if (numNearby > 0) { // avoid dividing by zero
-			alignForce*= (1/numNearby); //average the align force
+			alignForce*= (1.0f/numNearby); //average the align force
 			alignForce-= vel_i; // Implement Reynolds: Change = Desired - Current
+            centerOfNeighborMass*= (1.0f/numNearby); // average the center of mass of neighbors
+            cohesiveForce = (centerOfNeighborMass - pos_i);
 		}
 
         // Evade
@@ -174,14 +179,10 @@ vector<Vector3f> SimpleSystem::evalF(vector<Vector3f> state)
                 evadeForce+= (2*diff.normalized()/dist)*(daring+0.1);
             }
         }
-
-		// Cohesion
-		Vector3f perceived_center = perceivedCenter(flockCenter, pos_i);
-		cohesiveForce = (perceived_center - pos_i);
 		
 		forces+= sepForce * separationWeight;
 		forces+= alignForce * alignWeight * scatter;
-		forces+= cohesiveForce * cohesiveWeight * scatter;
+		forces+= cohesiveForce * cohesiveWeight * scatter * (social + 0.5);
         forces+= goalForce * goalWeight * scatter;
         forces+= evadeForce;
         forces+= boundPosition(pos_i); // Stay in Bounds
@@ -491,7 +492,7 @@ void SimpleSystem::updateGoal(int time_step) {
     switch (goalPatternId) {
         case 1: // Circular
         {
-            Vector3f circular = Vector3f(2*cos(time_step/30.0f), 1.5*sin(time_step/30.0f), 0);
+            Vector3f circular = Vector3f(3*cos(time_step/60.0f), 2.5*sin(time_step/60.0f), 0);
             m_vVecState[0] = circular;
             m_vVecState[1] = Vector3f::ZERO;
             break;
