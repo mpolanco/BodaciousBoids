@@ -288,8 +288,21 @@ void SimpleSystem::draw()
 
 		if (areParticlesVisible) { // display birds
 			Vector3f vel = m_vVecState[i+1].normalized(); // PARTICLE VELOCITY
-			float angle = rad_to_deg (acos(Vector3f::dot(vel, Vector3f::FORWARD)));
-		    glRotatef(angle, vel.x(), vel.y(), vel.z());
+			/*float angle = rad_to_deg (acos(Vector3f::dot(vel, Vector3f::FORWARD)));
+            float y_angle = rad_to_deg ( atan2(vel.x() , vel.z()) );
+            float x_angle = rad_to_deg ( atan2(vel.y() , vel.z()) );
+            float z_angle = rad_to_deg ( -1 * atan2(vel.y() , vel.x()) );
+		    //glRotatef(angle, pos[0], pos[1], pos[2]);
+            glRotatef(x_angle, 1.0, 0, 0);
+            glRotatef(y_angle, 0.0, 1.0, 0);
+            glRotatef(z_angle, 0.0, 0.0, 1.0);*/
+
+            float angle = rad_to_deg (acos(Vector3f::dot(vel, Vector3f::FORWARD)));
+            Vector3f axis = Vector3f::cross(vel, Vector3f::FORWARD).normalized();
+            glScalef(1.5, 1.5, 1.5);
+            glRotatef(angle, axis.x(),axis.y(),axis.z());
+            
+            //glRotatef(90, 0,0,1);
 		    drawDove();
 		} // otherwise display spheres
 		else {
@@ -312,9 +325,25 @@ void SimpleSystem::draw()
         glDisable(GL_COLOR_MATERIAL);
         if (areParticlesVisible) { // display birds
             Vector3f vel = m_vVecState[j+1].normalized(); // PARTICLE VELOCITY
+
+
+            glBegin(GL_LINES);
+            glVertex3f(0,0,0); glVertex(vel);
+            glEnd();
+
+
             float angle = rad_to_deg (acos(Vector3f::dot(vel, Vector3f::FORWARD)));
+            Vector3f axis = Vector3f::cross(vel, Vector3f::FORWARD).normalized();
             glScalef(1.5, 1.5, 1.5);
-            glRotatef(angle, vel.x(), vel.y(), vel.z());
+            glRotatef(angle, axis.x(),axis.y(),axis.z());
+            //float y_angle = rad_to_deg ( atan2(vel.x() , vel.z()) );
+            //float x_angle = rad_to_deg ( atan2(-vel.y() , abs(vel.z())) );
+            //float z_angle = rad_to_deg ( atan2(vel.y() , vel.x()) );
+            //glRotatef(angle, pos[0], pos[1], pos[2]);
+            //glRotatef(x_angle, 1.0, 0, 0);
+            //glRotatef(y_angle, 0.0, 1.0, 0);
+            //glRotatef(z_angle, 0.0, 0.0, 1.0);
+
             drawDove();
         } // otherwise display spheres
         else {

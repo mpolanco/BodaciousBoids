@@ -443,9 +443,9 @@ int main( int argc, char* argv[] )
 
     // Initial parameters for window position and size
     glutInitWindowPosition( 60, 60 );
-    glutInitWindowSize( 600, 600 );
+    glutInitWindowSize( 1200, 1000 );
 
-    camera.SetDimensions( 600, 600 );
+    camera.SetDimensions( 1200, 1000 );
 
     camera.SetDistance( 10 );
     camera.SetCenter( Vector3f::ZERO );
