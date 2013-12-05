@@ -83,14 +83,14 @@ protected:
     /* 
         PREDATOR VARIABLES AND METHODS 
     */
-    int predatorStartIndex; // the first index of predators in the state vector
-    int m_numPredators;
+        int predatorStartIndex; // the first index of predators in the state vector
+        int m_numPredators;
 
-    float predatorSeparation;
-    float maxVelocityPredator;
+        float predatorSeparation;
+        float maxVelocityPredator;
 
-    int findClosestPrey(vector<Vector3f> state, Vector3f predator_pos);
-    Vector3f limitPredatorVelocity(Vector3f vel, float speediness);
+        int findClosestPrey(vector<Vector3f> state, Vector3f predator_pos);
+        Vector3f limitPredatorVelocity(Vector3f vel, float speediness);
 
     /* 
         OBSTACLE METHODS AND VARIABLES 

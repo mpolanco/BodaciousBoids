@@ -35,9 +35,9 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 
 		m_vVecState.push_back(pos);
 		m_vVecState.push_back(vel);
-        daringness.push_back(randf_sym());
-        sociableness.push_back(randf_sym());
-        speediness.push_back(randf_sym());
+        daringness.push_back(randf());
+        sociableness.push_back(randf());
+        speediness.push_back(randf());
 	}
 
     predatorStartIndex = m_vVecState.size();
@@ -47,9 +47,9 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
 
         m_vVecState.push_back(pos);
         m_vVecState.push_back(vel);
-        daringness.push_back(randf_sym());
-        sociableness.push_back(randf_sym());
-        speediness.push_back(randf_sym());
+        daringness.push_back(randf());
+        sociableness.push_back(randf());
+        speediness.push_back(randf());
     }
 
     cohesiveWeight = 1 / 4.0f;
@@ -368,7 +368,7 @@ void SimpleSystem::drawObstacles() {
         glEnable(GL_COLOR_MATERIAL);
         glColor3f(1, 0.8549, 0.725);
         glDisable(GL_COLOR_MATERIAL);
-        glutSolidSphere(sphere_radius,10.0f,10.0f);
+        glutSolidSphere(sphere_radius, 15.0f, 15.0f);
         glPopMatrix();
     }
 }
