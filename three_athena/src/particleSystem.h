@@ -4,6 +4,7 @@
 #include <vector>
 #include <vecmath.h>
 #include <iostream>
+#include "SOIL.h"
 
 using namespace std;
 
