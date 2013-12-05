@@ -11,6 +11,8 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
     GOAL_CIRCULAR = 1;
     GOAL_ZIGZAG = 2;
 
+    showFeathers = true;
+    
     boxDims = Vector3f(4,4,4);
     reboundFactor = 2.0f;
     reboundZone = 0.1f;
@@ -318,7 +320,6 @@ void SimpleSystem::draw()
 
             float angle = rad_to_deg (acos(Vector3f::dot(vel, Vector3f::FORWARD)));
             Vector3f axis = Vector3f::cross(vel, Vector3f::FORWARD).normalized();
-            glScalef(1.5, 1.5, 1.5);
             glRotatef(angle, axis.x(),axis.y(),axis.z());
             
             //glRotatef(90, 0,0,1);

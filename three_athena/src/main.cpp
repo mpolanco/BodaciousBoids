@@ -359,7 +359,9 @@ namespace
             break;
         case 't':
             break;
-        case 'i':
+        case 'f':
+            cout << "Toggling feathers/personality colors" << endl;
+            system->toggleShowFeathers();
             break;
         case 'p':
             cout << "Toggling particles rendering" << endl;
