@@ -21,6 +21,9 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
     m_numBirds = numBirds;
     m_numPredators = numPredators;
 
+    populateDoveColors();
+    populateEagleColors();
+
     // push the goal's pos and vel first before any birds
     goalPatternId = 0;
     m_goalPos = Vector3f(0,0,0);
@@ -38,6 +41,7 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
         daringness.push_back(randf());
         sociableness.push_back(randf());
         speediness.push_back(randf_sym());
+        colorIndex.push_back(getRandomDoveColorIndex(i));
 	}
 
     predatorStartIndex = m_vVecState.size();
@@ -50,6 +54,7 @@ SimpleSystem::SimpleSystem(int numBirds, int numPredators)
         daringness.push_back(randf());
         sociableness.push_back(randf());
         speediness.push_back(randf_sym());
+        colorIndex.push_back(getRandomEagleColorIndex());
     }
 
     cohesiveWeight = 1 / 4.0f;
@@ -295,7 +300,8 @@ void SimpleSystem::draw()
 		glPushMatrix();
 		glTranslatef(pos[0], pos[1], pos[2] );
 		glEnable(GL_COLOR_MATERIAL);
-		glColor3f(.2 + 0.2*getSpeediness(i), .2, (i/2)*1.0/m_numBirds);
+        Vector3f color = getBirdColor(i);
+        glColor3f(color.x(), color.y(), color.z());
 		glDisable(GL_COLOR_MATERIAL);
 
 		if (areParticlesVisible) { // display birds
@@ -320,7 +326,8 @@ void SimpleSystem::draw()
         glPushMatrix();
         glTranslatef(predator_pos[0], predator_pos[1], predator_pos[2] );
         glEnable(GL_COLOR_MATERIAL);
-        glColor3f(0.54, 0.27, 0.074);
+        Vector3f color = getBirdColor(j);
+        glColor3f(color.x(), color.y(), color.z());
         glDisable(GL_COLOR_MATERIAL);
         if (areParticlesVisible) { // display birds
             Vector3f vel = m_vVecState[j+1].normalized(); // PARTICLE VELOCITY
